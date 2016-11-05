@@ -2,8 +2,29 @@
 #include "main.h"
 #include "GlobalDeclarations.h"
 
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795
+#endif
+
+#define RAD(x)          (M_PI*(x)/180)
+#define GRAUS(x)        (180*(x)/M_PI)
+
+GLboolean   DEBUG;
+GLboolean   VistaTopo;
+GLboolean   FPS;
+GLboolean   TPS;
+GLboolean   TARGET;
+GLboolean   GRID;
 
 int main(int argc, char** argv) {
+
+	DEBUG = GL_TRUE;
+	TPS = GL_TRUE;
+	FPS = GL_FALSE;
+	VistaTopo = GL_FALSE;
+	GRID = GL_TRUE;
+	TARGET = GL_TRUE;
+
 	//Initialize GLUT
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -18,11 +39,11 @@ int main(int argc, char** argv) {
 	
 	//Set handler functions
 	glutDisplayFunc(drawScene);
-	glutKeyboardFunc(handleKeypress);
-	glutKeyboardUpFunc(handleKeyUp);
+	glutKeyboardFunc(Key);
+	glutKeyboardUpFunc(KeyUp);
 	glutMotionFunc(handleActiveMouse);
 	glutPassiveMotionFunc(handlePassiveMouse);
-	glutReshapeFunc(handleResize);
+	glutReshapeFunc(Reshape);
 	glutIgnoreKeyRepeat(true);
 	if (isFullscreen){
 		glutSetCursor(GLUT_CURSOR_NONE);
@@ -34,6 +55,7 @@ int main(int argc, char** argv) {
 	playerTank->setHealth(playerHealth);
 	playerTank->setShieldStrength(10);
 	srand(time(0));
+	//glutTimerFunc(0, timer, 0);
 	glutMainLoop();
 	return 0;
 }
@@ -41,8 +63,12 @@ int main(int argc, char** argv) {
 //Initializes 3D rendering
 void initRendering() {
 	
-	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);	
-	
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	//glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
+
+	/*glEnable(GL_POINT_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_POLYGON_SMOOTH);*/
 	// set the fog attributes
 	/*glFogf(GL_FOG_START,  1.0f);
 	glFogf(GL_FOG_END,    200.0f);
@@ -67,7 +93,13 @@ void initRendering() {
 	
 }
 
-void timer(int value) {
+void timer(int n) {
+
+	glutTimerFunc(n, timer, n);
+
+	glutPostRedisplay();
+
+
 }
 
 //Draws the 3D scene
@@ -79,55 +111,224 @@ void drawScene() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+
 	
-	glPushMatrix();{
+	glPushMatrix();
 		
 	float x = 0.1f * (rand() % 10); //Move a origem do referencial do ecra para um lugar aleatório
 	float y = 0.1f * (rand() % 10);
 	float z = 0.1f * (rand() % 10);
 
-	//vista de topo
-	//gluLookAt(0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
 
-	//gluLookAt(playerTank->givePosX(), 0, playerTank->givePosZ(), 0, 0, 0, 0, 0, 0);
+	//makeReferenceCubes(1.5f, 0.1f);
 
+	//makeGrid(mapSize);
 
-	glRotatef(screenShakeMagnitude, x, y, z);
+	if (TPS) {
+		printf("TPS \n");
+	
+		glRotatef(screenShakeMagnitude, x, y, z);
+		glTranslatef(0.0f, -1.5f, -3.0f);
+		glRotatef(10, 1.0f, 0.0f, 0.0f);
 
-	//FPS or TPS
-	glTranslatef(0.0f, -1.5f, -3.0f);
-	glRotatef(10, 1.0f, 0.0f, 0.0f);
-	/*glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
-	glRotatef(lagDistance, 0.0f, 1.0f, 0.0f);
-	glRotatef(-playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-	glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());*/
+		glTranslatef(0.0f, -0.0f, -3.0f);
+		glRotatef(10, 1.0f, 0.0f, 0.0f);
+	}
+	else if (FPS) {
+		printf("FPS \n");
+		glRotatef(screenShakeMagnitude, x, y, z);
+		glTranslatef(0.0f, -1.5f, -3.0f);
+		glRotatef(10, 1.0f, 0.0f, 0.0f);
+	}
+	else if(VistaTopo){
+		printf("VP \n");
+		gluLookAt(0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
+		glRotatef(screenShakeMagnitude, x, y, z);
+	}
+	
+	if (GRID) {
+		makeGrid(mapSize);
+	}
 
-	glPushMatrix(); {
+	glPushMatrix();
+
 		glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
 		glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-		glColor4f(1.0f, 5.0f, 0.0f, 0.2f);
-		float seperation = 3.0f;
-	}glPopMatrix();
+		glColor4f(0.0f, 5.0f, 0.0f, 0.2f);
 
-	playerTank->drawSelf();
-	}glPopMatrix();
-	
-	setOrthographicProjection();
-		glPushMatrix();
-			glLoadIdentity();
-			renderBitmapString(720, 450, 10, GLUT_BITMAP_HELVETICA_18, "Hello World!");
+		if (TARGET) {
+			float seperation = 3.0f;
+
+			for (int i = 1; i <= 10; i++) {
+				float bulletTravel = (-seperation*i) / bulletSpeed;
+				glPushMatrix();
+				glTranslatef(0.0f, 0.0f, -seperation*i);
+				glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+				glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
+				glutSolidSphere(0.05f, 4, 4);
+				glPopMatrix();
+			}
+		}
+
+
 		glPopMatrix();
-	resetPerspectiveProjection();
-		
+
+		playerTank->drawSelf();
+
+
+	glPopMatrix();
+	
+	//glDisable(GL_LIGHTING);
+	drawHealthBars();
+	//glEnable(GL_LIGHTING);
+
 	glutSwapBuffers();
 }
 
 void renderBitmapString(float x, float y, float z, void *font, char *string) {  
+
 	char *c;
 	glRasterPos3f(x, y,z);
 	for (c=string; *c != '\0'; c++) {
 		glutBitmapCharacter(font, *c);
 	}
+}
+
+void imprime_ajuda(void)
+{
+	printf("\n\nDesenho de um quadrado\n");
+	printf("h,H - Ajuda \n");
+	printf("P   - Vista Primeira Pessoa\n");
+	printf("T   - Vista De Topo\n");
+	printf("V   - Vista Terceira Pessoa\n");
+	printf("G   - Grid ON/OFF \n");
+	printf("U   - Target ON/OFF \n");
+	printf("ESC - Sair\n");
+	printf("teclas do rato para iniciar/parar rotação e alternar eixos\n");
+
+}
+
+/* Callback para interaccao via teclado (carregar na tecla) */
+void Key(unsigned char key, int x, int y)
+{
+	switch (key) {
+	case 27:
+		exit(1);
+		/* ... accoes sobre outras teclas ... */
+
+	case 'h':
+	case 'H':
+		imprime_ajuda();
+		break;
+	case '+':
+		
+		break;
+
+	case '-':
+		
+		break;
+
+	case 'w':
+	case 'W':
+		playerTank->accelerate(true);
+		playerTank->move();
+		glutPostRedisplay();
+		break;
+	case 'p':
+	case 'P':
+		
+		FPS = GL_TRUE;
+		TPS = GL_FALSE;
+		VistaTopo = GL_FALSE;
+		glutPostRedisplay();
+		break;
+
+	case 't':
+	case 'T':
+
+		FPS = GL_FALSE;
+		TPS = GL_TRUE;
+		VistaTopo = GL_FALSE;
+		glutPostRedisplay();
+		break;
+
+	case 'v':
+	case 'V':
+
+		FPS = GL_FALSE;
+		TPS = GL_FALSE;
+		VistaTopo = GL_TRUE;
+		glutPostRedisplay();
+		break;
+	case 'g':
+	case 'G':
+		if (GRID) {
+			GRID = GL_FALSE;
+		}
+		else {
+			GRID = GL_TRUE;
+		}
+
+		glutPostRedisplay();
+		break;
+	case 'u':
+	case 'U':
+
+		if (TARGET) {
+			TARGET = GL_FALSE;
+		}
+		else {
+			TARGET = GL_TRUE;
+		}
+		glutPostRedisplay();
+		break;
+
+	}
+
+	if (DEBUG)
+		printf("Carregou na tecla %c\n", key);
+
+}
+
+void SpecialKey(int key, int x, int y)
+{
+	/* ... accoes sobre outras teclas especiais ...
+	GLUT_KEY_F1 ... GLUT_KEY_F12
+	GLUT_KEY_UP
+	GLUT_KEY_DOWN
+	GLUT_KEY_LEFT
+	GLUT_KEY_RIGHT
+	GLUT_KEY_PAGE_UP
+	GLUT_KEY_PAGE_DOWN
+	GLUT_KEY_HOME
+	GLUT_KEY_END
+	GLUT_KEY_INSERT
+	*/
+
+	switch (key) {
+
+		/* redesenhar o ecra */
+		//glutPostRedisplay();
+	case GLUT_KEY_F1:
+		
+		glutPostRedisplay();
+		break;
+
+	}
+
+
+	if (DEBUG)
+		printf("Carregou na tecla especial %d\n", key);
+}
+
+
+/* Callback para interaccao via teclado (largar a tecla) */
+void KeyUp(unsigned char key, int x, int y)
+{
+
+	if (DEBUG)
+		printf("Largou a tecla %c\n", key);
 }
 
 void setOrthographicProjection() {
@@ -172,30 +373,15 @@ void handleActiveMouse(int x, int y){
 	handlePassiveMouse(x,y);
 }
 
-void checkInput(){
-	if(keyDown[27]){
-		exit(0);
-	}
-	
-}
 
-//Called when a key is pressed
-void handleKeypress(unsigned char key, int x, int y) {    //The current mouse coordinates
-	keyDown[key] = true;
-}
-
-void handleKeyUp(unsigned char key, int x, int y){
-	keyDown[key] = false;
-}
-
-//Called when the window is resized
-void handleResize(int w, int h) {
-	glViewport(0, 0, w, h);
+void Reshape(int width, int height)
+{
+	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, (double)w / (double)h, 1.0, 200.0);
-	screenWidth = w;
-	screenHeight = h;
+	gluPerspective(45.0, (double)width / (double)height, 1.0, 200.0);
+	screenWidth = width;
+	screenHeight = height;
 }
 
 void playerFire(int button, int state, int x, int y){
@@ -213,8 +399,6 @@ void createObstacle(float x, float z, float r){
 void drawHealthBars(){
 	
 	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 
 }
 

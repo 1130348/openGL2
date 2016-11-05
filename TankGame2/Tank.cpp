@@ -421,7 +421,7 @@ void Tank::drawSelf(){
 		glPopMatrix();
 		if(this->hasShieldLeft()){
 			glColor4f(0.1f, 0.1f, 1.0f, this->shieldOpacity);
-			glutSolidSphere(this->width*3, 20, 20);
+			//glutSolidSphere(this->width*3, 20, 20);
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	

@@ -121,7 +121,7 @@ void normalizedCrossProduct(float v1[3], float v2[3], float out[3])
 
 
 void makeGrid(float size){
-	glColor4f(0.0f, 0.0f, 0.0f, 1.0f -radarVisionMagnitude);
+	glColor4f(0.0f, 0.0f, 2.0f, 1.0f -radarVisionMagnitude);
 	glBegin(GL_LINES);
 	for(int i=-size;i<=size;++i) {
 		glVertex3f(i,0,-size);
