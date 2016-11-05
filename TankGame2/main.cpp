@@ -13,6 +13,8 @@ int main(int argc, char** argv) {
 	//Create the window
 	glutCreateWindow("World of Tanks");
 	initRendering();
+
+
 	
 	//Set handler functions
 	glutDisplayFunc(drawScene);
@@ -42,25 +44,25 @@ void initRendering() {
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);	
 	
 	// set the fog attributes
-	glFogf(GL_FOG_START,  1.0f);
+	/*glFogf(GL_FOG_START,  1.0f);
 	glFogf(GL_FOG_END,    200.0f);
 	glFogfv(GL_FOG_COLOR,  fogColour);
 	glFogi(GL_FOG_MODE,   GL_EXP);
 	glFogf(GL_FOG_DENSITY, 0.1f);
 	
 	// enable the fog
-	glEnable(GL_FOG);
+	glEnable(GL_FOG);*/
 	
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	glEnable(GL_DEPTH_TEST);
+	/*glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_LIGHTING); //Enable lighting
 	glEnable(GL_LIGHT0); //Enable light #0
 	glEnable(GL_LIGHT1); //Enable light #1
 	glEnable(GL_NORMALIZE); //Automatically normalize normals
-	glShadeModel(GL_SMOOTH); //Enable smooth shading
+	glShadeModel(GL_SMOOTH); //Enable smooth shading*/
 	
 	
 }
@@ -71,26 +73,35 @@ void timer(int value) {
 //Draws the 3D scene
 void drawScene() {
 
-	glFogfv(GL_FOG_COLOR, fogColour);
+	//glFogfv(GL_FOG_COLOR, fogColour);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
+	
 	glPushMatrix();{
-
+		
 	float x = 0.1f * (rand() % 10); //Move a origem do referencial do ecra para um lugar aleatório
 	float y = 0.1f * (rand() % 10);
 	float z = 0.1f * (rand() % 10);
 
+	//vista de topo
+	//gluLookAt(0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
+
+	//gluLookAt(playerTank->givePosX(), 0, playerTank->givePosZ(), 0, 0, 0, 0, 0, 0);
+
+
 	glRotatef(screenShakeMagnitude, x, y, z);
-	glTranslatef(0.0f, -1.5f, -6.0f);
+
+	//FPS or TPS
+	glTranslatef(0.0f, -1.5f, -3.0f);
 	glRotatef(10, 1.0f, 0.0f, 0.0f);
-	glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
+	/*glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
 	glRotatef(lagDistance, 0.0f, 1.0f, 0.0f);
 	glRotatef(-playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-	glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());
+	glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());*/
+
 	glPushMatrix(); {
 		glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
 		glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
@@ -104,7 +115,7 @@ void drawScene() {
 	setOrthographicProjection();
 		glPushMatrix();
 			glLoadIdentity();
-			renderBitmapString(720,450,10,GLUT_BITMAP_HELVETICA_18,"Hello World!");
+			renderBitmapString(720, 450, 10, GLUT_BITMAP_HELVETICA_18, "Hello World!");
 		glPopMatrix();
 	resetPerspectiveProjection();
 		
@@ -201,4 +212,9 @@ void createObstacle(float x, float z, float r){
 
 void drawHealthBars(){
 	
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
 }
+
