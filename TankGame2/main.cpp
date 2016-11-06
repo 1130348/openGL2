@@ -16,6 +16,7 @@ GLboolean   TPS;
 GLboolean   TARGET;
 GLboolean   GRID;
 
+
 int main(int argc, char** argv) {
 
 	DEBUG = GL_TRUE;
@@ -39,8 +40,8 @@ int main(int argc, char** argv) {
 	
 	//Set handler functions
 	glutDisplayFunc(drawScene);
-	glutKeyboardFunc(Key);
-	glutKeyboardUpFunc(KeyUp);
+	glutKeyboardFunc(handleKeypress);
+	glutKeyboardUpFunc(handleKeyUp);
 	glutMotionFunc(handleActiveMouse);
 	glutPassiveMotionFunc(handlePassiveMouse);
 	glutReshapeFunc(Reshape);
@@ -53,9 +54,9 @@ int main(int argc, char** argv) {
 	
 	playerTank = new Tank(0.0f, 0.0f, 0.0f);
 	playerTank->setHealth(playerHealth);
-	playerTank->setShieldStrength(10);
+
 	srand(time(0));
-	//glutTimerFunc(0, timer, 0);
+	glutTimerFunc(25, timer, 0);
 	glutMainLoop();
 	return 0;
 }
@@ -95,11 +96,149 @@ void initRendering() {
 
 void timer(int n) {
 
-	glutTimerFunc(n, timer, n);
+	/*checkInput();
 
 	glutPostRedisplay();
 
+	glutTimerFunc(n, timer, n);*/
 
+	checkInput();
+
+	//playerTank->move();
+
+
+	glutPostRedisplay();
+	glutTimerFunc(25, timer, 0);
+
+
+}
+
+void checkInput() {
+	
+	if (keyDown[27]) {
+		exit(0);
+	}
+	if (keyDown['w']) {
+		
+		playerTank->accelerate(true);
+		playerTank->move();
+	}
+	if (keyDown['s']) {
+		playerTank->accelerate(false);
+		playerTank->move();
+	}
+	if (keyDown['a']) {
+		playerTank->rotate(true);
+		playerTank->move();
+	}
+	if (keyDown['d']) {
+		playerTank->rotate(false);
+		playerTank->move();
+	}
+	
+	if (keyDown['e']) {
+		zoomMagnitude += 0.02;
+	}
+	if (keyDown['k']) {
+		int direction = playerTank->centerTurret();
+		if (direction > 0) {
+			lagDistance += 2.5;
+		}
+		else if (direction < 0) {
+			lagDistance -= 2.5;
+		}
+	}
+	if (keyDown['p']) {
+
+		FPS = GL_TRUE;
+		TPS = GL_FALSE;
+		VistaTopo = GL_FALSE;
+		
+	}
+
+	if (keyDown['t']) {
+
+
+		FPS = GL_FALSE;
+		TPS = GL_TRUE;
+		VistaTopo = GL_FALSE;
+	
+	}
+
+	if (keyDown['v']) {
+
+		FPS = GL_FALSE;
+		TPS = GL_FALSE;
+		VistaTopo = GL_TRUE;
+		
+	}
+
+	if (keyDown['g']) {
+
+		if (GRID) {
+			GRID = GL_FALSE;
+		}
+		else {
+			GRID = GL_TRUE;
+		}
+
+		
+	}
+
+	if (keyDown['u']) {
+
+
+		if (TARGET) {
+			TARGET = GL_FALSE;
+		}
+		else {
+			TARGET = GL_TRUE;
+		}
+		
+	}
+
+	/*if (keyDown['u']) {
+		radarVisionActivated = true;
+	}
+	if (keyDown['o']) {
+		slowMotionActivated = true;
+	}
+	if (keyDown['j']) {
+		if (playerTank->giveRotationSpeed() > 0.5f) {
+			playerTank->rotateTurret(1.0f);
+		}
+		else if (playerTank->giveRotationSpeed() < -0.5f) {
+			playerTank->rotateTurret(-1.0f);
+		}
+		playerTank->rotateTurret(1.5f);
+		lagDistance += 2.5;
+	}
+	if (keyDown['l']) {
+		if (playerTank->giveRotationSpeed() > 0.5f) {
+			playerTank->rotateTurret(1.0f);
+		}
+		else if (playerTank->giveRotationSpeed() < -0.5f) {
+			playerTank->rotateTurret(-1.0f);
+		}
+		playerTank->rotateTurret(-1.5f);
+		lagDistance -= 2.5;
+	}
+	if (keyDown[' '] || leftMouseDown) {
+		if (playerTank->fire()) {
+			screenShakeMagnitude += 0.1f;
+		}
+	}*/
+	
+}
+
+void handleKeypress(unsigned char key, int x, int y) {    
+	keyDown[key] = true;
+	//printf("Carregou na tecla %c\n", key);
+}
+
+void handleKeyUp(unsigned char key, int x, int y) {
+	keyDown[key] = false;
+	//printf("Carregou na tecla %c\n", key);
 }
 
 //Draws the 3D scene
@@ -116,71 +255,81 @@ void drawScene() {
 	
 	glPushMatrix();
 		
-	float x = 0.1f * (rand() % 10); //Move a origem do referencial do ecra para um lugar aleatório
-	float y = 0.1f * (rand() % 10);
-	float z = 0.1f * (rand() % 10);
+		float x = 0.1f * (rand() % 10); //Move a origem do referencial do ecra para um lugar aleatório
+		float y = 0.1f * (rand() % 10);
+		float z = 0.1f * (rand() % 10);
 
 
-	//makeReferenceCubes(1.5f, 0.1f);
+		if (TPS) {
+			printf("TPS \n");
 
-	//makeGrid(mapSize);
 
-	if (TPS) {
-		printf("TPS \n");
-	
-		glRotatef(screenShakeMagnitude, x, y, z);
-		glTranslatef(0.0f, -1.5f, -3.0f);
-		glRotatef(10, 1.0f, 0.0f, 0.0f);
+			glTranslatef(0.0f, -1.5f, -3.0f);
+			glRotatef(10, 1.0f, 0.0f, 0.0f);
 
-		glTranslatef(0.0f, -0.0f, -3.0f);
-		glRotatef(10, 1.0f, 0.0f, 0.0f);
-	}
-	else if (FPS) {
-		printf("FPS \n");
-		glRotatef(screenShakeMagnitude, x, y, z);
-		glTranslatef(0.0f, -1.5f, -3.0f);
-		glRotatef(10, 1.0f, 0.0f, 0.0f);
-	}
-	else if(VistaTopo){
-		printf("VP \n");
-		gluLookAt(0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
-		glRotatef(screenShakeMagnitude, x, y, z);
-	}
-	
-	if (GRID) {
-		makeGrid(mapSize);
-	}
-
-	glPushMatrix();
-
-		glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
-		glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-		glColor4f(0.0f, 5.0f, 0.0f, 0.2f);
-
-		if (TARGET) {
-			float seperation = 3.0f;
-
-			for (int i = 1; i <= 10; i++) {
-				float bulletTravel = (-seperation*i) / bulletSpeed;
-				glPushMatrix();
-				glTranslatef(0.0f, 0.0f, -seperation*i);
-				glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-				glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
-				glutSolidSphere(0.05f, 4, 4);
-				glPopMatrix();
-			}
+			glTranslatef(0.0f, -0.0f, -3.0f);
+			glRotatef(10, 1.0f, 0.0f, 0.0f);
 		}
+		else if (FPS) {
+			printf("FPS \n");
+
+			glTranslatef(0.0f, -1.5f, 3.0f);
+			glRotatef(10, 1.0f, 0.0f, 0.0f);
+		}
+		else if (VistaTopo) {
+			printf("VP \n");
+			gluLookAt(0.0, 20.0, 20.0, 0.0, 0.0,0.0, 0.0, 0.0, -1.0);
+			glRotatef(screenShakeMagnitude, x, y, z);
+		}
+
+		glRotatef(screenShakeMagnitude, x, y, z);
+		glTranslatef(0.0f, -1.5f, -6.0f);
+		glRotatef(10, 1.0f, 0.0f, 0.0f);
+		glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
+		//glRotatef(lagDistance, 0.0f, 1.0f, 0.0f);
+		//glRotatef(-playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+
+		glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());
+
+		//makeReferenceCubes(1.5f, 0.1f);
+
+		//makeGrid(mapSize);
+
+		
+		if (GRID) {
+			makeGrid(mapSize);
+		}
+
+		glPushMatrix();
+
+			glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
+			glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+			glColor4f(0.0f, 5.0f, 0.0f, 0.2f);
+
+			if (TARGET) {
+				float seperation = 3.0f;
+
+				for (int i = 1; i <= 10; i++) {
+					float bulletTravel = (-seperation*i) / bulletSpeed;
+					glPushMatrix();
+						glTranslatef(0.0f, 0.0f, -seperation*i);
+						glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+						glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
+						glutSolidSphere(0.05f, 4, 4);
+					glPopMatrix();
+				}
+			}
 
 
 		glPopMatrix();
 
+		
 		playerTank->drawSelf();
-
 
 	glPopMatrix();
 	
 	//glDisable(GL_LIGHTING);
-	drawHealthBars();
+	//drawHealthBars();
 	//glEnable(GL_LIGHTING);
 
 	glutSwapBuffers();
@@ -209,127 +358,12 @@ void imprime_ajuda(void)
 
 }
 
-/* Callback para interaccao via teclado (carregar na tecla) */
-void Key(unsigned char key, int x, int y)
-{
-	switch (key) {
-	case 27:
-		exit(1);
-		/* ... accoes sobre outras teclas ... */
-
-	case 'h':
-	case 'H':
-		imprime_ajuda();
-		break;
-	case '+':
-		
-		break;
-
-	case '-':
-		
-		break;
-
-	case 'w':
-	case 'W':
-		playerTank->accelerate(true);
-		playerTank->move();
-		glutPostRedisplay();
-		break;
-	case 'p':
-	case 'P':
-		
-		FPS = GL_TRUE;
-		TPS = GL_FALSE;
-		VistaTopo = GL_FALSE;
-		glutPostRedisplay();
-		break;
-
-	case 't':
-	case 'T':
-
-		FPS = GL_FALSE;
-		TPS = GL_TRUE;
-		VistaTopo = GL_FALSE;
-		glutPostRedisplay();
-		break;
-
-	case 'v':
-	case 'V':
-
-		FPS = GL_FALSE;
-		TPS = GL_FALSE;
-		VistaTopo = GL_TRUE;
-		glutPostRedisplay();
-		break;
-	case 'g':
-	case 'G':
-		if (GRID) {
-			GRID = GL_FALSE;
-		}
-		else {
-			GRID = GL_TRUE;
-		}
-
-		glutPostRedisplay();
-		break;
-	case 'u':
-	case 'U':
-
-		if (TARGET) {
-			TARGET = GL_FALSE;
-		}
-		else {
-			TARGET = GL_TRUE;
-		}
-		glutPostRedisplay();
-		break;
-
-	}
-
-	if (DEBUG)
-		printf("Carregou na tecla %c\n", key);
-
-}
-
-void SpecialKey(int key, int x, int y)
-{
-	/* ... accoes sobre outras teclas especiais ...
-	GLUT_KEY_F1 ... GLUT_KEY_F12
-	GLUT_KEY_UP
-	GLUT_KEY_DOWN
-	GLUT_KEY_LEFT
-	GLUT_KEY_RIGHT
-	GLUT_KEY_PAGE_UP
-	GLUT_KEY_PAGE_DOWN
-	GLUT_KEY_HOME
-	GLUT_KEY_END
-	GLUT_KEY_INSERT
-	*/
-
-	switch (key) {
-
-		/* redesenhar o ecra */
-		//glutPostRedisplay();
-	case GLUT_KEY_F1:
-		
-		glutPostRedisplay();
-		break;
-
-	}
 
 
-	if (DEBUG)
-		printf("Carregou na tecla especial %d\n", key);
-}
 
 
-/* Callback para interaccao via teclado (largar a tecla) */
-void KeyUp(unsigned char key, int x, int y)
-{
 
-	if (DEBUG)
-		printf("Largou a tecla %c\n", key);
-}
+
 
 void setOrthographicProjection() {
 	

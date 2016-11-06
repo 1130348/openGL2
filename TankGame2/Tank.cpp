@@ -26,12 +26,12 @@ Tank::Tank(float positionX, float positionZ, float initialRotation){
 	this->recoilStrength = 0.7f;
 	this->recoilDistance = 0.0f;
 	this->curRecoilForce = 0.0f;
-	this->lastSightingX = positionX;
-	this->lastSightingZ = positionZ;
 	this->boostSpeed = 0;
 	this->boostPower = 0.02f;
-	this->shieldStrength = 0;
-	this->shieldOpacity = 0.0f;
+	this->lastSightingX = positionX;
+	this->lastSightingZ = positionZ;
+
+
 }
 
 void Tank::accelerate(bool directionIsForward){
@@ -41,22 +41,10 @@ void Tank::accelerate(bool directionIsForward){
 	else {
 		this->speed -= 0.02;
 	}
+
+
 }
 
-void Tank::boost(){
-	this->boostSpeed += this->boostPower;
-}
-
-void Tank::activateShield(){
-	if (this->hasShieldLeft()) {
-		this->shieldOpacity = 1.0f;
-		this->shieldStrength -= 1;
-	}
-}
-
-bool Tank::hasShieldLeft(){
-	return this->shieldStrength > 0;
-}
 
 void Tank::rotate(bool directionIsPositive){
 	this->rotationSpeed *= 0.01f;
@@ -66,9 +54,11 @@ void Tank::rotate(bool directionIsPositive){
 	else {
 		this->rotationSpeed -= 3.5;
 	}
-	if (this->boostSpeed > 0.02f){
-		this->rotationSpeed /= (this->boostSpeed)*100.0f;
-	}
+	
+}
+
+void Tank::boost() {
+	this->boostSpeed += this->boostPower;
 }
 
 void Tank::rotateTurret(float amount){
@@ -82,8 +72,9 @@ void Tank::rotateTurret(float amount){
 }
 
 void Tank::move(){
-	this->speedX = -(this->speed+this->boostSpeed) * sin(this->rotation * PI / 180);
-	this->speedZ = -(this->speed+this->boostSpeed) * cos(this->rotation * PI / 180);
+	//Frente ou Tras
+	this->speedX = -(this->speed + this->boostSpeed) * sin(this->rotation * PI / 180);
+	this->speedZ = -(this->speed + this->boostSpeed) * cos(this->rotation * PI / 180);
 
 	if (this->canMoveTo(this->posX + this->speedX, this->posZ)){
 		this->posX += this->speedX;
@@ -98,13 +89,14 @@ void Tank::move(){
 		this->speedZ *= 0.5f;
 	}
 
+	//Esquerda ou Direita
 	this->rotation += this->rotationSpeed;
-	this->turretRotation -= this->rotationSpeed;
+	/*this->turretRotation -= this->rotationSpeed;
 	this->turretRotation += this->turretRotationSpeed;
-	this->turretRotationSpeed *= 0.5f;
+	this->turretRotationSpeed *= 0.5f;*/
 	this->rotationSpeed *= 0.5f;
 	this->speed *= 0.8f;
-	this->boostSpeed *= 0.8f;
+
 	if (this->rotation > 360.0f){
 		this->rotation -= 360.0f;
 	}
@@ -119,10 +111,7 @@ void Tank::move(){
 	}
 	this->reloadCounter -= 1;
 	
-	this->recoilDistance += this->curRecoilForce;
-	this->curRecoilForce *= 0.5f;
-	this->recoilDistance *= 0.8f;
-	this->shieldOpacity *= 0.95f;
+
 }
 
 //void Tank::runAI(){
@@ -320,14 +309,6 @@ void Tank::setHealth(int newHealth){
 	this->health = newHealth;
 }
 
-void Tank::setShieldStrength(int newStrength){
-	this->shieldStrength = newStrength;
-}
-
-int Tank::giveShieldStrength(){
-	return this->shieldStrength;
-}
-
 bool Tank::canMoveTo(float newX, float newZ){
 	if (newX > mapSize - 1.0f || newX < -mapSize + 1.0f || newZ > mapSize - 1.0f || newZ < -mapSize + 1.0f){
 		return false;
@@ -419,11 +400,7 @@ void Tank::drawSelf(){
 			glTranslatef(0.0f, 0.0f, -0.2f + this->recoilDistance*0.8f);
 			makeRectangularPrism(0.05f, -0.05f, -1.0f, -0.05f, 0.05f, 0.0f);
 		glPopMatrix();
-		if(this->hasShieldLeft()){
-			glColor4f(0.1f, 0.1f, 1.0f, this->shieldOpacity);
-			//glutSolidSphere(this->width*3, 20, 20);
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		}
+		
 	
 			
 	glPopMatrix();

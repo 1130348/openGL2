@@ -12,7 +12,7 @@ class Tank {
 		void rotateTurret(float amount);
 		void move();
 		void drawSelf();
-		void shiftPerspectivetoSelf();
+
 		float givePosX();
 		float givePosZ();
 		float giveSpeedX();
@@ -29,14 +29,10 @@ class Tank {
 		void turnTurretToward(float newAngle);
 		void turnToward(float newAngle);
 		void setHealth(int newHealth);
-		void boost();
-		float giveBoostSpeed();
-		void activateShield();
-		bool hasShieldLeft();
-		int giveShieldStrength();
-		void setShieldStrength(int newStrength);
 		int centerTurret();
 		bool canMoveTo(float newX, float newZ);
+		void boost();
+		float giveBoostSpeed();
 		
 	private:
 		float speed;
@@ -54,10 +50,10 @@ class Tank {
 		float destinX, destinZ;
 		float lastSightingX, lastSightingZ;
 		bool atDestination;
-		float recoilStrength, recoilDistance, curRecoilForce;
 		float boostSpeed, boostPower;
-		int shieldStrength;
-		float shieldOpacity;
+		float recoilStrength, recoilDistance, curRecoilForce;
+
+	
 };
 
 #endif
