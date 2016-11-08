@@ -1,10 +1,11 @@
-﻿  Tank.cpp
-c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\tank.cpp(316): warning C4018: '<': signed/unsigned mismatch
-  main.cpp
-c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\main.cpp(106): warning C4018: '<': signed/unsigned mismatch
-c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\main.cpp(255): warning C4018: '<': signed/unsigned mismatch
-  Cutils.cpp
-  Bullet.cpp
+﻿  main.cpp
+c:\users\asus\desktop\sgrai\sgrai_rep2\tankgame2\main.cpp(113): warning C4018: '<': signed/unsigned mismatch
+c:\users\asus\desktop\sgrai\sgrai_rep2\tankgame2\main.cpp(270): warning C4018: '<': signed/unsigned mismatch
+c:\users\asus\desktop\sgrai\sgrai_rep2\tankgame2\main.cpp(333): warning C4018: '<': signed/unsigned mismatch
+  Tank.cpp
+c:\users\asus\desktop\sgrai\sgrai_rep2\tankgame2\tank.cpp(134): warning C4018: '<': signed/unsigned mismatch
   Generating Code...
-  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.exe
-  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.pdb (Full PDB)
+  Skipping... (no relevant changes detected)
+  Cutils.cpp
+  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP2\TankGame2\Debug\TankGame2.exe
+  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP2\TankGame2\Debug\TankGame2.pdb (Full PDB)

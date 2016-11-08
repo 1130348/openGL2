@@ -2,7 +2,22 @@
 #include "Cutils.h"
 #include "Globals.h"
 
+#define LARGURA_BASE        3
+#define COMPRIMENTO_BASE    5
+#define ALTURA_BASE         0.7
+
+#define LARGURA_TORRE       2
+#define COMPRIMENTO_TORRE   2
+#define ALTURA_TORRE        0.5
+
+#define COMPRIMENTO_CANHAO  4
+#define RAIO_CANHAO         0.2
+
 Tank::Tank(float positionX, float positionZ, float initialRotation){
+	
+	this->viewCamp = 80.0f;
+	this->viewCounter = 0;
+	
 	this->speed = 0.0f;
 	this->posX = positionX;
 	this->posZ = positionZ;
@@ -17,8 +32,8 @@ Tank::Tank(float positionX, float positionZ, float initialRotation){
 	this->reloadTime = 20;
 	this->reloadCounter = this->reloadTime;
 	this->canSeePlayer = false;
-	this->sightRange = 23.0f;
-	this->sightCounter = 0;
+	
+	
 	this->isAimed = false;
 	this->destinX = positionX;
 	this->destinZ = positionZ;
@@ -28,8 +43,8 @@ Tank::Tank(float positionX, float positionZ, float initialRotation){
 	this->curRecoilForce = 0.0f;
 	this->boostSpeed = 0;
 	this->boostPower = 0.02f;
-	this->lastSightingX = positionX;
-	this->lastSightingZ = positionZ;
+	this->lastViewX = positionX;
+	this->lastViewZ = positionZ;
 
 
 }
@@ -110,50 +125,48 @@ void Tank::move(){
 		this->turretRotation += 360.0f;
 	}
 	this->reloadCounter -= 1;
-	
-
 }
 
-void Tank::runAI(){
+bool Tank::canMoveTo(float newX, float newZ) {
+	if (newX > mapSize - 1.0f || newX < -mapSize + 1.0f || newZ > mapSize - 1.0f || newZ < -mapSize + 1.0f) {
+		return false;
+	}
+	for (int i = 0; i < tanks.size(); i++) {
+		if (this != tanks[i] && distanceBetween(newX, newZ, tanks[i]->posX, tanks[i]->posZ) < 4.5f) {
+			return false;
+		}
+	}
+
+	if (this != playerTank && distanceBetween(newX, newZ, playerTank->posX, playerTank->posZ) < 4.5f) {
+		return false;
+	}
+	return true;
+}
+
+void Tank::runTanksBots(){
+	
 	float dist = distanceBetween(this->givePosX(), this->givePosZ(), playerTank->givePosX(), playerTank->givePosZ());
 	
-	this->sightCounter -= 1;
+	this->viewCounter -= 1;
 	
-	if (dist < this->sightRange){
-		this->sightCounter = 10;
+	if (dist < this->viewCamp){
+		this->viewCounter = 10;
 		this->canSeePlayer = true;
-	}
-	else {
-		if (this->sightCounter < 0) {
+	}else {
+		if (this->viewCounter < 0) {
 			this->canSeePlayer = false;
-			this->destinX = this->lastSightingX;
-			this->destinZ = this->lastSightingZ;
+			this->destinX = this->lastViewX;
+			this->destinZ = this->lastViewZ;
 
 		}
 	}
 	
-	if(this->canSeePlayer){
-		float bulletCyclesToTarget = dist/bulletSpeed;	
-		float pX = playerTank->givePosX() - bulletCyclesToTarget*playerTank->speed*sin(playerTank->rotation*PI/180) - bulletCyclesToTarget*this->speedX;
-		float pZ = playerTank->givePosZ() - bulletCyclesToTarget*playerTank->speed*cos(playerTank->rotation*PI/180) - bulletCyclesToTarget*this->speedZ;
-		this->turnTurretToward(this->angleTo(pX, pZ));
-		/*if (this->isAimed){
-			this->fire();
-		}*/
-		this->lastSightingX = playerTank->givePosX();
-		this->lastSightingZ = playerTank->givePosZ();
-	}
-	else {
-	}
-
-	if (distanceBetween(this->posX, this->posZ, this->destinX, this->destinZ) > 5.0f) {
+	if (distanceBetween(this->posX, this->posZ, this->destinX, this->destinZ) > 1.0f) {
 		this->atDestination = false;
 	}
 	else {
 		this->atDestination = true;
 	}
-
-	
 	if (!(rand() % 30) && this->canSeePlayer){
 		this->destinX += rand() % 20 - 10;
 		this->destinZ += rand() % 20 - 10;
@@ -188,40 +201,40 @@ float Tank::angleTo(float x, float z){
 	return 0;
 }
 
-void Tank::turnTurretToward(float newAngle){
-	this->isAimed = false;
-	float curAngle = this->rotation+this->turretRotation;
-	if (curAngle > 180){
-		curAngle -= 360;
-	}
-	else if (curAngle < -180){
-		curAngle += 360;
-	}
-	if (curAngle > 90 && newAngle < -90){
-		newAngle += 360;
-	}
-	else if (curAngle < -90 && newAngle > 90){
-		newAngle -= 360;
-	}
-	if (curAngle < newAngle){
-		if (newAngle - curAngle >= 1.0f){
-			this->rotateTurret(1.0f);
-		}
-		else {
-			this->rotateTurret(newAngle - curAngle);
-			this->isAimed = true;
-		}
-	}
-	else if (curAngle > newAngle){
-		if (newAngle - curAngle <= -1.0f){
-			this->rotateTurret(-1.0f);
-		}
-		else {
-			this->rotateTurret(newAngle - curAngle);
-			this->isAimed = true;
-		}
-	}
-}
+//void Tank::turnTurretToward(float newAngle){
+//	this->isAimed = false;
+//	float curAngle = this->rotation+this->turretRotation;
+//	if (curAngle > 180){
+//		curAngle -= 360;
+//	}
+//	else if (curAngle < -180){
+//		curAngle += 360;
+//	}
+//	if (curAngle > 90 && newAngle < -90){
+//		newAngle += 360;
+//	}
+//	else if (curAngle < -90 && newAngle > 90){
+//		newAngle -= 360;
+//	}
+//	if (curAngle < newAngle){
+//		if (newAngle - curAngle >= 1.0f){
+//			this->rotateTurret(1.0f);
+//		}
+//		else {
+//			this->rotateTurret(newAngle - curAngle);
+//			this->isAimed = true;
+//		}
+//	}
+//	else if (curAngle > newAngle){
+//		if (newAngle - curAngle <= -1.0f){
+//			this->rotateTurret(-1.0f);
+//		}
+//		else {
+//			this->rotateTurret(newAngle - curAngle);
+//			this->isAimed = true;
+//		}
+//	}
+//}
 
 void Tank::turnToward(float newAngle){
 	float curAngle = this->rotation;
@@ -249,9 +262,7 @@ void Tank::turnToward(float newAngle){
 	}
 }
 
-void Tank::damage(int amount){
-	this->health -= amount;
-}
+
 
 int Tank::centerTurret(){
 	if (this->turretRotation > 1.0f){
@@ -309,101 +320,89 @@ void Tank::setHealth(int newHealth){
 	this->health = newHealth;
 }
 
-bool Tank::canMoveTo(float newX, float newZ){
-	if (newX > mapSize - 1.0f || newX < -mapSize + 1.0f || newZ > mapSize - 1.0f || newZ < -mapSize + 1.0f){
-		return false;
-	}
-	for (int i = 0; i < tanks.size(); i++) {
-		if (this != tanks[i] && distanceBetween(newX, newZ, tanks[i]->posX, tanks[i]->posZ) < 1.5f){
-			return false;
-		}
-	}
-	
-	if (this != playerTank && distanceBetween(newX, newZ, playerTank->posX, playerTank->posZ) < 1.5f) {
-		return false;
-	}
-	return true;
+void Tank::damage(int amount) {
+	this->health -= amount;
 }
 
-void Tank::drawSelf(){
-	glPushMatrix();
+
+
+void desenhaPoligono(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloat cor[])
+{
+
+	glBegin(GL_POLYGON);
+	glColor3fv(cor);
+	glVertex3fv(a);
+	glVertex3fv(b);
+	glVertex3fv(c);
+	glVertex3fv(d);
+	glEnd();
+}
+
+void desenhaCubo()
+{
+	GLfloat vertices[][3] = { { -0.5,-0.5,-0.5 },
+	{ 0.5,-0.5,-0.5 },
+	{ 0.5,0.5,-0.5 },
+	{ -0.5,0.5,-0.5 },
+	{ -0.5,-0.5,0.5 },
+	{ 0.5,-0.5,0.5 },
+	{ 0.5,0.5,0.5 },
+	{ -0.5,0.5,0.5 } };
+
+	GLfloat cores[][3] = { { 0.0,1.0,1.0 },
+	{ 1.0,0.0,0.0 },
+	{ 1.0,1.0,0.0 },
+	{ 0.0,1.0,0.0 },
+	{ 1.0,0.0,1.0 },
+	{ 0.0,0.0,1.0 },
+	{ 1.0,1.0,1.0 } };
+
+	desenhaPoligono(vertices[1], vertices[0], vertices[3], vertices[2], cores[0]);
+	desenhaPoligono(vertices[2], vertices[3], vertices[7], vertices[6], cores[1]);
+	desenhaPoligono(vertices[3], vertices[0], vertices[4], vertices[7], cores[2]);
+	desenhaPoligono(vertices[6], vertices[5], vertices[1], vertices[2], cores[3]);
+	desenhaPoligono(vertices[4], vertices[5], vertices[6], vertices[7], cores[4]);
+	desenhaPoligono(vertices[5], vertices[4], vertices[0], vertices[1], cores[5]);
+}
+
+void desenhaTanque()
+{
+
+	glPushMatrix(); {
+		glTranslated(0, 0, ALTURA_BASE*0.5);
+		glScalef(LARGURA_BASE, COMPRIMENTO_BASE, ALTURA_BASE);
+		desenhaCubo();
+	}glPopMatrix();
+	glPushMatrix(); {
+		glTranslated(0, 0, 1);
+		glScalef(LARGURA_TORRE, COMPRIMENTO_TORRE, ALTURA_TORRE);
+		//glRotatef(20, 0, 0, 1);
+		desenhaCubo();
+
+		glTranslated(0, COMPRIMENTO_TORRE - 1, 0);
+		//glRotatef(, 1, 0, 0);
+
+		glTranslated(0, 1, 0);
+		glScalef(RAIO_CANHAO, COMPRIMENTO_CANHAO, RAIO_CANHAO);
+		desenhaCubo();
+	}glPopMatrix();
+}
+
+void Tank::buildTank() {
+	glPushMatrix(); {
 		glTranslatef(this->posX, 0.0f, this->posZ);
 		glRotatef(this->rotation, 0.0f, 1.0f, 0.0f);
-		
-	
-		static float w, h, d, d2;
-		w = this->width; //0.5
-		h = this->height; //0.5
-		d = this->depth;	//0.7
-		d2 = this->depth / 1.4f; //0.5
-	
+		glRotatef(90, 1.0f, 0.0f, 0.0f);
+		glRotatef(180, 0.0f, 1.0f, 0.0f);
+		glRotatef(180, 0.0f, 0.0f, 1.0f);
 
-		glBegin(GL_QUADS);
-		//Front
-		glNormal3f(0.0f, h, -d);
+		glEnable(GL_POINT_SMOOTH);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POLYGON_SMOOTH);
+		glEnable(GL_DEPTH_TEST);
+		desenhaTanque();
+	}glPopMatrix();
 
-		glVertex3d(-1, -1, 0);
-		glVertex3d(1, -1, 0);
-		glVertex3d(1, 1, 0);
-		glVertex3d(-1, 1, 0);
-
-		//Back
-		glNormal3f(0.0f, -0.5f, 0.7f);
-
-		glVertex3d(-1, -1, 0);
-		glVertex3d(1, -1, 0);
-		glVertex3d(1, 1, 0);
-		glVertex3d(-1, 1, 0);
-
-		//Left
-		glNormal3f(-1.0f, 0.0f, 0.0f);
-
-		glVertex3d(-1, -1, 0);
-		glVertex3d(1, -1, 0);
-		glVertex3d(1, 1, 0);
-		glVertex3d(-1, 1, 0);
-
-		//Right
-		glNormal3f(1.0f, 0.0f, 0.0f);
-
-		glVertex3d(-1, -1, 0);
-		glVertex3d(1, -1, 0);
-		glVertex3d(1, 1, 0);
-		glVertex3d(-1, 1, 0);
-
-		//Bottom
-		glNormal3f(0.0f, -1.0f, 0.0f);
-
-		glVertex3d(-1, -1, 0);
-		glVertex3d(1, -1, 0);
-		glVertex3d(1, 1, 0);
-		glVertex3d(-1, 1, 0);
-
-
-		//Top
-		glNormal3f(0.0f, 1.0f, 0.0f);
-
-		glVertex3d(-1, -1, 0);
-		glVertex3d(1, -1, 0);
-		glVertex3d(1, 1, 0);
-		glVertex3d(-1, 1, 0);
-
-		glEnd();
-
-		glPushMatrix();
-			glTranslatef(0.0f, h*1.3f, 0.0f);
-			glRotatef(this->turretRotation, 0.0f, 1.0f, 0.0f);
-			glTranslatef(0.0f, 0.0f, this->recoilDistance*0.5);
-			makeRectangularPrism(w*(3.0f/5.0f), 0.0f, -d/2, -w*(3.0f/5.0f), h/2, d/2);
-			glTranslatef(0.0f, 0.025f, -0.6f);
-			glTranslatef(0.0f, 0.0f, -0.2f + this->recoilDistance*0.8f);
-			makeRectangularPrism(0.05f, -0.05f, -1.0f, -0.05f, 0.05f, 0.0f);
-		glPopMatrix();
-		
-	
-			
-	glPopMatrix();
-	
 }
 
 Tank::~Tank(){

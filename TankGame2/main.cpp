@@ -112,7 +112,7 @@ void timer(int n) {
 	if (slowMotionCounter >= slowMotionMagnitude) {
 		for (int i = 0; i < tanks.size(); i++) {
 			tanks[i]->move();
-			tanks[i]->runAI();
+			tanks[i]->runTanksBots();
 			slowMotionCounter = 0;
 		}
 	}
@@ -234,9 +234,7 @@ void drawScene() {
 		float x = 0; 
 		float y = 0;
 		float z = 0;
-
-
-		if (TPS) {
+	if (TPS) {
 			//printf("TPS \n");
 
 
@@ -272,33 +270,30 @@ void drawScene() {
 		for (int i = 0; i < tanks.size(); i++) {
 
 			glColor3f(1.0, 0, 1);
-			tanks[i]->drawSelf();
+			tanks[i]->buildTank();
 		}
-		
-
-
-		glPushMatrix();
+			glPushMatrix();
 
 			glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
 			glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
 			glColor3f(1,0 , 0);
 
 			if (TARGET) {
-				float seperation = 1.0f;
+				float seperation = 3.0f;
 
 				for (int i = 1; i <= 10; i++) {
 					float bulletTravel = (-seperation*i) / bulletSpeed;
 					glPushMatrix();
-						glTranslatef(0.0f, 0.0f, -seperation*i);
-						glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-						glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
-						glutSolidSphere(0.1, 4, 4);
+					glTranslatef(0.0f, 0.0f, -seperation*i);
+					glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+					glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
+					glutSolidSphere(0.05f, 4, 4);
 					glPopMatrix();
 				}
 			}
 		glPopMatrix();
 		glColor3f(0, 2.0f, 0.3f);
-		playerTank->drawSelf();
+		playerTank->buildTank();
 
 	glPopMatrix();
 	

@@ -11,7 +11,8 @@ class Tank {
 		void rotate(bool directionIsPositive);
 		void rotateTurret(float amount);
 		void move();
-		void drawSelf();
+		void buildTank();
+		void runTanksBots();
 
 		float givePosX();
 		float givePosZ();
@@ -24,7 +25,7 @@ class Tank {
 		float giveHealth();
 		void damage(int amount);
 		bool isDead();
-		void runAI();
+		
 		float angleTo(float x, float z);
 		void turnTurretToward(float newAngle);
 		void turnToward(float newAngle);
@@ -35,6 +36,12 @@ class Tank {
 		float giveBoostSpeed();
 		
 	private:
+		float viewCamp;
+		int viewCounter;
+		float lastViewX, lastViewZ;
+		bool canSeePlayer;
+		
+		
 		float speed;
 		float posX, posZ;
 		float speedX, speedZ;
@@ -43,12 +50,8 @@ class Tank {
 		float turretRotation, turretRotationSpeed;
 		int health;
 		int reloadTime, reloadCounter;
-		bool canSeePlayer;
-		float sightRange;
-		int sightCounter;
 		bool isAimed;
 		float destinX, destinZ;
-		float lastSightingX, lastSightingZ;
 		bool atDestination;
 		float boostSpeed, boostPower;
 		float recoilStrength, recoilDistance, curRecoilForce;
