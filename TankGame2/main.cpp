@@ -53,22 +53,29 @@ int main(int argc, char** argv) {
 	glutMouseFunc(playerFire);
 	glutIgnoreKeyRepeat(1);
 	
-	playerTank = new Tank(0.0f, 0.0f, 0.0f);
-	playerTank->setHealth(playerHealth);
-	srand(time(0));
-	
-	createTank(10);
+	inicia();
 	
 	glutTimerFunc(25, timer, 0);
 	glutMainLoop();
 	return 0;
 }
 
+void inicia() {
+
+	deleteTanks();
+	playerTank = new Tank(0.0f, 0.0f, 0.0f);
+	playerTank->setHealth(playerHealth);
+	srand(time(0));
+
+	createTank(numTanks);
+
+}
+
 //Initializes 3D rendering
 void initRendering() {
 	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
-	//glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
+	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
 
 	/*glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
@@ -78,15 +85,15 @@ void initRendering() {
 	glFogf(GL_FOG_END,    200.0f);
 	glFogfv(GL_FOG_COLOR,  fogColour);
 	glFogi(GL_FOG_MODE,   GL_EXP);
-	glFogf(GL_FOG_DENSITY, 0.1f);
+	glFogf(GL_FOG_DENSITY, 0.01f);*/
 	
 	// enable the fog
-	glEnable(GL_FOG);*/
+	//glEnable(GL_FOG);
 	
-	glEnable (GL_BLEND);
+	/*glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	/*glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_LIGHTING); //Enable lighting
 	glEnable(GL_LIGHT0); //Enable light #0
@@ -149,6 +156,9 @@ void checkInput() {
 		else if (direction < 0) {
 			lagDistance -= 2.5;
 		}
+	}
+	if (keyDown['r']) {
+		inicia();
 	}
 	if (keyDown['p']) {
 
@@ -219,14 +229,15 @@ void drawScene() {
 	glLoadIdentity();
 
 	glPushMatrix();
-		
-		float x = 0.1f * (rand() % 10); //Move a origem do referencial do ecra para um lugar aleatório
-		float y = 0.1f * (rand() % 10);
-		float z = 0.1f * (rand() % 10);
+
+
+		float x = 0; 
+		float y = 0;
+		float z = 0;
 
 
 		if (TPS) {
-			printf("TPS \n");
+			//printf("TPS \n");
 
 
 			glTranslatef(0.0f, -1.5f, -3.0f);
@@ -236,13 +247,13 @@ void drawScene() {
 			glRotatef(10, 1.0f, 0.0f, 0.0f);
 		}
 		else if (FPS) {
-			printf("FPS \n");
+			//printf("FPS \n");
 
 			glTranslatef(0.0f, -1.5f, 3.0f);
 			glRotatef(10, 1.0f, 0.0f, 0.0f);
 		}
 		else if (VistaTopo) {
-			printf("VP \n");
+			//printf("VP \n");
 			gluLookAt(0.0, 20.0, 20.0, 0.0, 0.0,0.0, 0.0, 0.0, -1.0);
 			glRotatef(screenShakeMagnitude, x, y, z);
 		}
@@ -252,24 +263,28 @@ void drawScene() {
 		glRotatef(10, 1.0f, 0.0f, 0.0f);
 		glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
 		glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());
+
+
+		if (GRID) {
+			makeGrid(mapSize);
+		}
+
 		for (int i = 0; i < tanks.size(); i++) {
+
+			glColor3f(1.0, 0, 1);
 			tanks[i]->drawSelf();
 		}
 		
 
-		
-		if (GRID) {
-			makeGrid(mapSize);
-		}
 
 		glPushMatrix();
 
 			glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
 			glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-			glColor4f(0.0f, 5.0f, 0.0f, 0.2f);
+			glColor3f(1,0 , 0);
 
 			if (TARGET) {
-				float seperation = 3.0f;
+				float seperation = 1.0f;
 
 				for (int i = 1; i <= 10; i++) {
 					float bulletTravel = (-seperation*i) / bulletSpeed;
@@ -277,11 +292,12 @@ void drawScene() {
 						glTranslatef(0.0f, 0.0f, -seperation*i);
 						glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
 						glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
-						glutSolidSphere(0.05f, 4, 4);
+						glutSolidSphere(0.1, 4, 4);
 					glPopMatrix();
 				}
 			}
 		glPopMatrix();
+		glColor3f(0, 2.0f, 0.3f);
 		playerTank->drawSelf();
 
 	glPopMatrix();
@@ -289,6 +305,10 @@ void drawScene() {
 	//glDisable(GL_LIGHTING);
 	//drawHealthBars();
 	//glEnable(GL_LIGHTING);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glColor3f(1, 0, 0);
+	printtext(50, 50, "HEALTH: 100%");
+	printtext(50, 35, "1/5 RELOAD");
 
 	glutSwapBuffers();
 }
@@ -300,6 +320,30 @@ void renderBitmapString(float x, float y, float z, void *font, char *string) {
 	for (c=string; *c != '\0'; c++) {
 		glutBitmapCharacter(font, *c);
 	}
+}
+
+void printtext(int x, int y,   string string)
+{
+	//(x,y) is from the bottom left of the window
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0, screenWidth, 0, screenHeight, -1.0f, 1.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glPushAttrib(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
+	glRasterPos2i(x, y);
+	for (int i = 0; i<string.size(); i++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, string[i]);
+	}
+	glPopAttrib();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 void imprime_ajuda(void)
@@ -391,6 +435,15 @@ void createTank(int numTanks){
 	}
 	
 }
+
+void deleteTanks() {
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	tanks.clear();
+
+}
+
+
 
 void createObstacle(float x, float z, float r){
 	

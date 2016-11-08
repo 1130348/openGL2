@@ -1,7 +1,11 @@
+#include <iostream>
+#include <string.h>
+#include <string>
 #include "Definitions.h"
 #include "Cutils.h"
 #include "Tank.h"
 
+using namespace std;
 
 #ifndef _MAIN_H
 #define _MAIN_H
@@ -11,9 +15,12 @@ void Reshape(int w, int h);
 void handlePassiveMouse(int x, int y);
 void handleActiveMouse(int x, int y);
 
+void printtext(int x, int y, std::string string);
 
 void initRendering();
 void drawScene();
+void inicia();
+void deleteTanks();
 void setOrthographicProjection();
 void resetPerspectiveProjection();
 void renderBitmapString(float x, float y, float z, void *font, char *string);

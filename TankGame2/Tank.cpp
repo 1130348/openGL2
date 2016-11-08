@@ -336,58 +336,57 @@ void Tank::drawSelf(){
 		h = this->height; //0.5
 		d = this->depth;	//0.7
 		d2 = this->depth / 1.4f; //0.5
-		
-		glColor3f(0.0f,1.0f, 0.3f);
+	
 
 		glBegin(GL_QUADS);
 		//Front
 		glNormal3f(0.0f, h, -d);
 
-		glVertex3f(-w, h, -d);
-		glVertex3f(w, h, -d);
-		glVertex3f(w, 0.0, -d2);
-		glVertex3f(-w, 0.0, -d2);
+		glVertex3d(-1, -1, 0);
+		glVertex3d(1, -1, 0);
+		glVertex3d(1, 1, 0);
+		glVertex3d(-1, 1, 0);
 
 		//Back
 		glNormal3f(0.0f, -0.5f, 0.7f);
 
-		glVertex3f(-w, h, d2);
-		glVertex3f(w, h, d2);
-		glVertex3f(w, 0.0, d);
-		glVertex3f(-w, 0.0, d);
+		glVertex3d(-1, -1, 0);
+		glVertex3d(1, -1, 0);
+		glVertex3d(1, 1, 0);
+		glVertex3d(-1, 1, 0);
 
 		//Left
 		glNormal3f(-1.0f, 0.0f, 0.0f);
 
-		glVertex3f(-w, h, -d);
-		glVertex3f(-w, 0.0, -d2);
-		glVertex3f(-w, 0.0, d);
-		glVertex3f(-w, h, d2);
+		glVertex3d(-1, -1, 0);
+		glVertex3d(1, -1, 0);
+		glVertex3d(1, 1, 0);
+		glVertex3d(-1, 1, 0);
 
 		//Right
 		glNormal3f(1.0f, 0.0f, 0.0f);
 
-		glVertex3f(w, h, -d);
-		glVertex3f(w, 0.0, -d2);
-		glVertex3f(w, 0.0, d);
-		glVertex3f(w, h, d2);
+		glVertex3d(-1, -1, 0);
+		glVertex3d(1, -1, 0);
+		glVertex3d(1, 1, 0);
+		glVertex3d(-1, 1, 0);
 
 		//Bottom
 		glNormal3f(0.0f, -1.0f, 0.0f);
 
-		glVertex3f(-w, 0.0, -d2);
-		glVertex3f(-w, 0.0, d);
-		glVertex3f(w, 0.0, d);
-		glVertex3f(w, 0.0, -d2);
+		glVertex3d(-1, -1, 0);
+		glVertex3d(1, -1, 0);
+		glVertex3d(1, 1, 0);
+		glVertex3d(-1, 1, 0);
 
 
 		//Top
 		glNormal3f(0.0f, 1.0f, 0.0f);
 
-		glVertex3f(-w, h, -d);
-		glVertex3f(-w, h, d2);
-		glVertex3f(w, h, d2);
-		glVertex3f(w, h, -d);
+		glVertex3d(-1, -1, 0);
+		glVertex3d(1, -1, 0);
+		glVertex3d(1, 1, 0);
+		glVertex3d(-1, 1, 0);
 
 		glEnd();
 
