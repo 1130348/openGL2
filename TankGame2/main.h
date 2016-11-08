@@ -23,9 +23,11 @@ int main(int argc, char** argv);
 void handleKeyUp(unsigned char key, int x, int y);
 void checkInput();
 void playerFire(int button, int state, int x, int y);
-void createTank(float x, float y);
+void createTank(GLint numTanks);
 void createObstacle(float x, float z, float r);
 void drawHealthBars();
+
+
 
 #endif
 

@@ -1,43 +1,6 @@
 #include "Cutils.h"
 #include "Globals.h"
 
-void makeCube(float size){
-	float len = 0.5f*size;
-	makeRectangularPrism(-len, -len, -len, len, len, len);
-}
-
-void makeReferenceCubes(float size, float cubeSize){
-	
-	glColor3f(1.0f, 1.0f, 1.0f);
-	
-	glPushMatrix();
-	
-	glTranslatef(size, size, size);
-	makeCube(cubeSize);
-	
-	glTranslatef(-2*size, 0.0f, 0.0f);
-	makeCube(cubeSize);
-	
-	glTranslatef(0.0f, 0.0f, -2*size);
-	makeCube(cubeSize);
-	
-	glTranslatef(2*size, 0.0f, 0.0f);
-	makeCube(cubeSize);
-	
-	glTranslatef(0.0f, -2*size, 0.0f);
-	makeCube(cubeSize);
-	
-	glTranslatef(-2*size, 0.0f, 0.0f);
-	makeCube(cubeSize);
-	
-	glTranslatef(0.0f, 0.0f, 2*size);
-	makeCube(cubeSize);
-	
-	glTranslatef(2*size, 0.0f, 0.0f);
-	makeCube(cubeSize);
-	
-	glPopMatrix();
-}
 
 void makeRectangularPrism(float x1, float y1, float z1, float x2, float y2, float z2){
 	float width = (x2-x1)/2;

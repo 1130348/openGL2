@@ -1,2 +1,10 @@
-﻿  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.exe
+﻿  Tank.cpp
+c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\tank.cpp(316): warning C4018: '<': signed/unsigned mismatch
+  main.cpp
+c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\main.cpp(106): warning C4018: '<': signed/unsigned mismatch
+c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\main.cpp(255): warning C4018: '<': signed/unsigned mismatch
+  Cutils.cpp
+  Bullet.cpp
+  Generating Code...
+  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.exe
   TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.pdb (Full PDB)

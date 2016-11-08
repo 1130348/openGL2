@@ -114,60 +114,60 @@ void Tank::move(){
 
 }
 
-//void Tank::runAI(){
-//	float dist = distanceBetween(this->givePosX(), this->givePosZ(), playerTank->givePosX(), playerTank->givePosZ());
-//	
-//	this->sightCounter -= 1;
-//	
-//	if (dist < this->sightRange){
-//		this->sightCounter = 10;
-//		this->canSeePlayer = true;
-//	}
-//	else {
-//		if (this->sightCounter < 0) {
-//			this->canSeePlayer = false;
-//			this->destinX = this->lastSightingX;
-//			this->destinZ = this->lastSightingZ;
-//
-//		}
-//	}
-//	
-//	if(this->canSeePlayer){
-//		float bulletCyclesToTarget = dist/bulletSpeed;	
-//		float pX = playerTank->givePosX() - bulletCyclesToTarget*playerTank->speed*sin(playerTank->rotation*PI/180) - bulletCyclesToTarget*this->speedX;
-//		float pZ = playerTank->givePosZ() - bulletCyclesToTarget*playerTank->speed*cos(playerTank->rotation*PI/180) - bulletCyclesToTarget*this->speedZ;
-//		this->turnTurretToward(this->angleTo(pX, pZ));
-//		if (this->isAimed){
-//			this->fire();
-//		}
-//		this->lastSightingX = playerTank->givePosX();
-//		this->lastSightingZ = playerTank->givePosZ();
-//	}
-//	else {
-//	}
-//
-//	if (distanceBetween(this->posX, this->posZ, this->destinX, this->destinZ) > 5.0f) {
-//		this->atDestination = false;
-//	}
-//	else {
-//		this->atDestination = true;
-//	}
-//
-//	
-//	if (!(rand() % 30) && this->canSeePlayer){
-//		this->destinX += rand() % 20 - 10;
-//		this->destinZ += rand() % 20 - 10;
-//	}
-//	
-//	if (this->atDestination){
-//		this->rotate(true);
-//		this->accelerate(true);
-//	}
-//	else {
-//		this->turnToward(this->angleTo(this->destinX, this->destinZ));
-//		this->accelerate(true);
-//	}
-//}
+void Tank::runAI(){
+	float dist = distanceBetween(this->givePosX(), this->givePosZ(), playerTank->givePosX(), playerTank->givePosZ());
+	
+	this->sightCounter -= 1;
+	
+	if (dist < this->sightRange){
+		this->sightCounter = 10;
+		this->canSeePlayer = true;
+	}
+	else {
+		if (this->sightCounter < 0) {
+			this->canSeePlayer = false;
+			this->destinX = this->lastSightingX;
+			this->destinZ = this->lastSightingZ;
+
+		}
+	}
+	
+	if(this->canSeePlayer){
+		float bulletCyclesToTarget = dist/bulletSpeed;	
+		float pX = playerTank->givePosX() - bulletCyclesToTarget*playerTank->speed*sin(playerTank->rotation*PI/180) - bulletCyclesToTarget*this->speedX;
+		float pZ = playerTank->givePosZ() - bulletCyclesToTarget*playerTank->speed*cos(playerTank->rotation*PI/180) - bulletCyclesToTarget*this->speedZ;
+		this->turnTurretToward(this->angleTo(pX, pZ));
+		/*if (this->isAimed){
+			this->fire();
+		}*/
+		this->lastSightingX = playerTank->givePosX();
+		this->lastSightingZ = playerTank->givePosZ();
+	}
+	else {
+	}
+
+	if (distanceBetween(this->posX, this->posZ, this->destinX, this->destinZ) > 5.0f) {
+		this->atDestination = false;
+	}
+	else {
+		this->atDestination = true;
+	}
+
+	
+	if (!(rand() % 30) && this->canSeePlayer){
+		this->destinX += rand() % 20 - 10;
+		this->destinZ += rand() % 20 - 10;
+	}
+	
+	if (this->atDestination){
+		this->rotate(true);
+		this->accelerate(true);
+	}
+	else {
+		this->turnToward(this->angleTo(this->destinX, this->destinZ));
+		this->accelerate(true);
+	}
+}
 
 float Tank::angleTo(float x, float z){
 	float deltaX = x - this->posX;

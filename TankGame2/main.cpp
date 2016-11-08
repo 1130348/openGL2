@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
 	GRID = GL_TRUE;
 	TARGET = GL_TRUE;
 
+
 	//Initialize GLUT
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -54,8 +55,10 @@ int main(int argc, char** argv) {
 	
 	playerTank = new Tank(0.0f, 0.0f, 0.0f);
 	playerTank->setHealth(playerHealth);
-
 	srand(time(0));
+	
+	createTank(10);
+	
 	glutTimerFunc(25, timer, 0);
 	glutMainLoop();
 	return 0;
@@ -96,21 +99,20 @@ void initRendering() {
 
 void timer(int n) {
 
-	/*checkInput();
-
-	glutPostRedisplay();
-
-	glutTimerFunc(n, timer, n);*/
-
 	checkInput();
+	
+	slowMotionCounter++;
+	if (slowMotionCounter >= slowMotionMagnitude) {
+		for (int i = 0; i < tanks.size(); i++) {
+			tanks[i]->move();
+			tanks[i]->runAI();
+			slowMotionCounter = 0;
+		}
+	}
 
-	//playerTank->move();
-
-
+	playerTank->move();
 	glutPostRedisplay();
 	glutTimerFunc(25, timer, 0);
-
-
 }
 
 void checkInput() {
@@ -181,8 +183,6 @@ void checkInput() {
 		else {
 			GRID = GL_TRUE;
 		}
-
-		
 	}
 
 	if (keyDown['u']) {
@@ -194,40 +194,9 @@ void checkInput() {
 		else {
 			TARGET = GL_TRUE;
 		}
-		
 	}
 
-	/*if (keyDown['u']) {
-		radarVisionActivated = true;
-	}
-	if (keyDown['o']) {
-		slowMotionActivated = true;
-	}
-	if (keyDown['j']) {
-		if (playerTank->giveRotationSpeed() > 0.5f) {
-			playerTank->rotateTurret(1.0f);
-		}
-		else if (playerTank->giveRotationSpeed() < -0.5f) {
-			playerTank->rotateTurret(-1.0f);
-		}
-		playerTank->rotateTurret(1.5f);
-		lagDistance += 2.5;
-	}
-	if (keyDown['l']) {
-		if (playerTank->giveRotationSpeed() > 0.5f) {
-			playerTank->rotateTurret(1.0f);
-		}
-		else if (playerTank->giveRotationSpeed() < -0.5f) {
-			playerTank->rotateTurret(-1.0f);
-		}
-		playerTank->rotateTurret(-1.5f);
-		lagDistance -= 2.5;
-	}
-	if (keyDown[' '] || leftMouseDown) {
-		if (playerTank->fire()) {
-			screenShakeMagnitude += 0.1f;
-		}
-	}*/
+
 	
 }
 
@@ -244,15 +213,11 @@ void handleKeyUp(unsigned char key, int x, int y) {
 //Draws the 3D scene
 void drawScene() {
 
-	//glFogfv(GL_FOG_COLOR, fogColour);
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-
-	
 	glPushMatrix();
 		
 		float x = 0.1f * (rand() % 10); //Move a origem do referencial do ecra para um lugar aleatório
@@ -286,14 +251,11 @@ void drawScene() {
 		glTranslatef(0.0f, -1.5f, -6.0f);
 		glRotatef(10, 1.0f, 0.0f, 0.0f);
 		glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
-		//glRotatef(lagDistance, 0.0f, 1.0f, 0.0f);
-		//glRotatef(-playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-
 		glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());
-
-		//makeReferenceCubes(1.5f, 0.1f);
-
-		//makeGrid(mapSize);
+		for (int i = 0; i < tanks.size(); i++) {
+			tanks[i]->drawSelf();
+		}
+		
 
 		
 		if (GRID) {
@@ -319,11 +281,7 @@ void drawScene() {
 					glPopMatrix();
 				}
 			}
-
-
 		glPopMatrix();
-
-		
 		playerTank->drawSelf();
 
 	glPopMatrix();
@@ -357,13 +315,6 @@ void imprime_ajuda(void)
 	printf("teclas do rato para iniciar/parar rotação e alternar eixos\n");
 
 }
-
-
-
-
-
-
-
 
 void setOrthographicProjection() {
 	
@@ -422,7 +373,22 @@ void playerFire(int button, int state, int x, int y){
 	
 }
 
-void createTank(float x, float y){
+void createTank(int numTanks){
+	
+	for (int i = 0; i < numTanks; i++) {
+		int x = 0;
+		int z = 0;
+		while (distanceBetween(0, 0, x, z) < 20) {
+			x = rand() % (2 * mapSize) - mapSize;
+			z = rand() % (2 * mapSize) - mapSize;
+		}
+		tanks.push_back(new Tank(x, z, 0.0f));//Adiciona ultima posicao do vetor de tanques
+		if (!tanks[i]->canMoveTo(tanks[i]->givePosX(), tanks[i]->givePosZ())) {
+			delete tanks[i];
+			tanks.erase(tanks.begin() + i);
+			i--;
+		}
+	}
 	
 }
 
