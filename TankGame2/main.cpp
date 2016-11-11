@@ -15,6 +15,7 @@ GLboolean   FPS;
 GLboolean   TPS;
 GLboolean   TARGET;
 GLboolean   GRID;
+GLboolean   AJUDA;
 
 
 int main(int argc, char** argv) {
@@ -25,6 +26,7 @@ int main(int argc, char** argv) {
 	VistaTopo = GL_FALSE;
 	GRID = GL_TRUE;
 	TARGET = GL_TRUE;
+	AJUDA = GL_FALSE;
 
 
 	//Initialize GLUT
@@ -206,6 +208,18 @@ void checkInput() {
 		}
 	}
 
+	if (keyDown['h']) {
+
+		if (AJUDA) {
+			AJUDA = GL_FALSE;
+			//imprime_ajuda();
+		}
+		else {
+			AJUDA = GL_TRUE;
+
+		}
+
+	}
 
 	
 }
@@ -301,20 +315,27 @@ void drawScene() {
 	//drawHealthBars();
 	//glEnable(GL_LIGHTING);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (AJUDA) {
+
+		glColor3f(0, 0, 0);
+
+		printtext(520, 450, "Controlos:");
+		printtext(520, 400, "h,H - Ajuda ");
+		printtext(520, 350, "P   - Vista Primeira Pessoa");
+		printtext(520, 300, "T   - Vista De Topo");
+		printtext(520, 250, "V   - Vista Terceira Pessoa");
+		printtext(520, 200, "G   - Grid ON/OFF");
+		printtext(520, 150, "U   - Target ON/OFF");
+		printtext(520, 100, "ESC - Sair");
+
+	}
+
 	glColor3f(1, 0, 0);
 	printtext(50, 50, "HEALTH: 100%");
-	printtext(50, 35, "1/5 RELOAD");
+	printtext(50, 30, "1/5 RELOAD");
 
 	glutSwapBuffers();
-}
-
-void renderBitmapString(float x, float y, float z, void *font, char *string) {  
-
-	char *c;
-	glRasterPos3f(x, y,z);
-	for (c=string; *c != '\0'; c++) {
-		glutBitmapCharacter(font, *c);
-	}
 }
 
 void printtext(int x, int y,   string string)
@@ -332,7 +353,7 @@ void printtext(int x, int y,   string string)
 	glRasterPos2i(x, y);
 	for (int i = 0; i<string.size(); i++)
 	{
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, string[i]);
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
 	}
 	glPopAttrib();
 	glMatrixMode(GL_PROJECTION);
@@ -343,7 +364,7 @@ void printtext(int x, int y,   string string)
 
 void imprime_ajuda(void)
 {
-	printf("\n\nDesenho de um quadrado\n");
+	printf("\n\nControlos\n");
 	printf("h,H - Ajuda \n");
 	printf("P   - Vista Primeira Pessoa\n");
 	printf("T   - Vista De Topo\n");
@@ -351,7 +372,6 @@ void imprime_ajuda(void)
 	printf("G   - Grid ON/OFF \n");
 	printf("U   - Target ON/OFF \n");
 	printf("ESC - Sair\n");
-	printf("teclas do rato para iniciar/parar rotação e alternar eixos\n");
 
 }
 

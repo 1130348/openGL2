@@ -23,7 +23,6 @@ void inicia();
 void deleteTanks();
 void setOrthographicProjection();
 void resetPerspectiveProjection();
-void renderBitmapString(float x, float y, float z, void *font, char *string);
 void timer(int n);
 int main(int argc, char** argv);
 //void makeTank();
