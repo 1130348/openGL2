@@ -32,6 +32,7 @@ extern float lagDistance;
 
 extern Tank* playerTank;
 extern std::vector<Tank*> tanks;
+extern std::vector<Bullet*> bullets;
 
 extern float fogColour[];
 extern float originalfogColour[];

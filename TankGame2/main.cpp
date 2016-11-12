@@ -39,8 +39,6 @@ int main(int argc, char** argv) {
 	glutCreateWindow("World of Tanks");
 	initRendering();
 
-
-	
 	//Set handler functions
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(handleKeypress);
@@ -71,6 +69,7 @@ void inicia() {
 
 	createTank(numTanks);
 
+
 }
 
 //Initializes 3D rendering
@@ -78,38 +77,12 @@ void initRendering() {
 	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
-
-	/*glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);*/
-	// set the fog attributes
-	/*glFogf(GL_FOG_START,  1.0f);
-	glFogf(GL_FOG_END,    200.0f);
-	glFogfv(GL_FOG_COLOR,  fogColour);
-	glFogi(GL_FOG_MODE,   GL_EXP);
-	glFogf(GL_FOG_DENSITY, 0.01f);*/
-	
-	// enable the fog
-	//glEnable(GL_FOG);
-	
-	/*glEnable (GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_LIGHTING); //Enable lighting
-	glEnable(GL_LIGHT0); //Enable light #0
-	glEnable(GL_LIGHT1); //Enable light #1
-	glEnable(GL_NORMALIZE); //Automatically normalize normals
-	glShadeModel(GL_SMOOTH); //Enable smooth shading*/
-	
-	
 }
 
 void timer(int n) {
 
 	checkInput();
-	
+	checkFire();
 	slowMotionCounter++;
 	if (slowMotionCounter >= slowMotionMagnitude) {
 		for (int i = 0; i < tanks.size(); i++) {
@@ -119,10 +92,55 @@ void timer(int n) {
 		}
 	}
 
+	if (playerTank->isDead() && (!invincibility)) {
+		
+	}
+	if (numTanks <= 0) {
+		
+	}
 	playerTank->move();
+	
+	bulletSpeed = bulletSpeedOriginal*(50.0f - slowMotionMagnitude) / 50.0f;
+	lagDistance *= 0.95;
+	screenShakeMagnitude *= 0.95;
+	zoomMagnitude *= 0.95;
 	glutPostRedisplay();
 	glutTimerFunc(25, timer, 0);
 }
+
+void checkFire() {
+	bool bulletNotDead = true;
+	for (int i = 0; i < bullets.size(); i++) {
+		bullets[i]->move();
+		bulletNotDead = true;
+		for (int j = 0; j < tanks.size() && bulletNotDead; j++) {
+			if (tanks[j]->isHitBy(bullets[i])) {
+				tanks[j]->damage(10);
+				bullets[i]->flagAsDead();
+				bulletNotDead = false;
+			}
+		}
+		if (bulletNotDead && playerTank->isHitBy(bullets[i])) {
+			if (playerTank->hasShieldLeft()) {
+				playerTank->activateShield();
+			}
+			else if (!invincibility) {
+				playerTank->damage(10);
+				screenShakeMagnitude += 1.0f;
+			}
+			bullets[i]->flagAsDead();
+		}
+	}
+
+	for (int i = 0; i < bullets.size(); i++) {
+		if (bullets[i]->isDead()) {
+			delete bullets[i];
+			bullets.erase(bullets.begin() + i);
+		}
+	}
+}
+
+
 
 void checkInput() {
 	
@@ -157,6 +175,12 @@ void checkInput() {
 		}
 		else if (direction < 0) {
 			lagDistance -= 2.5;
+		}
+	}
+
+	if (keyDown['x']) {
+		if (playerTank->fire()) {
+			screenShakeMagnitude += 0.1f;
 		}
 	}
 	if (keyDown['r']) {
@@ -222,6 +246,8 @@ void checkInput() {
 	}
 
 	
+
+	
 }
 
 void handleKeypress(unsigned char key, int x, int y) {    
@@ -280,6 +306,8 @@ void drawScene() {
 		if (GRID) {
 			makeGrid(mapSize);
 		}
+		drawBullets();
+		//drawPiramids();
 
 		for (int i = 0; i < tanks.size(); i++) {
 
@@ -458,15 +486,64 @@ void deleteTanks() {
 
 }
 
+void drawBullets() {
 
-
-void createObstacle(float x, float z, float r){
-	
+	for (int i = 0; i <bullets.size(); i++) {
+		bullets[i]->drawBullet();
+	}
 }
 
-void drawHealthBars(){
-	
-	
+
+
+void cleanBullets() {
+	for (int i = 0; i < bullets.size(); i++) {
+		if (bullets[i]->isDead()) {
+			delete bullets[i];
+			bullets.erase(bullets.begin() + i);
+		}
+	}
 
 }
+
+//void drawPiramids() {
+//	glEnable(GL_POINT_SMOOTH);
+//	glEnable(GL_LINE_SMOOTH);
+//	glEnable(GL_POLYGON_SMOOTH);
+//	glEnable(GL_DEPTH_TEST);
+//	GLfloat places[][3] = { { 4,1,4 },{ -5,1,1 },{ 9,1,6 },{ 6,1,-2 },{-1,1,4 },{-10,1,7},{-3,1,-5}};
+//
+//	for (int i = 0; i < 6; i++) {
+//		glPushMatrix(); {
+//			glScalef(7, 2, 2);
+//			
+//			glTranslatef( places[i][0], places[i][1],places[i][2]);
+//			makePyramid();
+//
+//		}glPopMatrix();
+//	}
+//}
+//
+//void makePyramid()
+//{
+//	glBegin(GL_TRIANGLES);
+//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(0.0f, 1.f, 0.0f);
+//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
+//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
+//
+//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(0.0f, 1.0f, 0.0f);
+//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
+//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(0.0f, -1.0f, -1.0f);
+//
+//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(0.0f, 1.0f, 0.0f);
+//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(0.0f, -1.0f, -1.0f);
+//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
+//
+//
+//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
+//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(0.0f, -1.0f, -1.0f);
+//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
+//
+//	glEnd();
+//
+//}
 

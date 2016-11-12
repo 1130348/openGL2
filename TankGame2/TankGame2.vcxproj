@@ -155,12 +155,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
-    <ClCompile Include="Cutils.cpp" />
+    <ClCompile Include="MathForms.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cutils.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="MathForms.h" />
     <ClInclude Include="Definitions.h" />
     <ClInclude Include="GlobalDeclarations.h" />
     <ClInclude Include="Globals.h" />

@@ -4,7 +4,7 @@ bool leftMouseDown = false;
 bool isFullscreen = true;
 float bulletSpeed = 0.5f;
 float bulletSpeedOriginal = 0.5f;
-int playerHealth = 10;
+int playerHealth = 100;
 float screenShakeMagnitude= 0.0f;
 float zoomMagnitude = 0.0f;
 int screenWidth = 0, screenHeight = 0;
@@ -24,8 +24,10 @@ float lagDistance = 0;
 
 
 Tank* playerTank;
+Bullet* bullet;
 
 std::vector<Tank*> tanks;
+std::vector<Bullet*>bullets;
 
 float fogColour[] = { 0.5, 0.5, 0.5, 1.0 };
 float originalfogColour[] = {1.0f,2.0f,0.79f,0.0f};

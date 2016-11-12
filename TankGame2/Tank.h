@@ -1,4 +1,5 @@
 #include "Definitions.h"
+#include "Bullet.h"
 
 #ifndef _TANK_H
 #define _TANK_H
@@ -13,7 +14,8 @@ class Tank {
 		void move();
 		void buildTank();
 		void runTanksBots();
-
+		bool isHitBy(Bullet* theBullet);
+		
 		float givePosX();
 		float givePosZ();
 		float giveSpeedX();
@@ -25,22 +27,25 @@ class Tank {
 		float giveHealth();
 		void damage(int amount);
 		bool isDead();
-		
+		bool fire();
 		float angleTo(float x, float z);
-		void turnTurretToward(float newAngle);
 		void turnToward(float newAngle);
 		void setHealth(int newHealth);
 		int centerTurret();
 		bool canMoveTo(float newX, float newZ);
 		void boost();
-		float giveBoostSpeed();
+		void activateShield();
+		bool hasShieldLeft();
+		int giveShieldStrength();
+		void setShieldStrength(int newStrength);
+		void turnTurretToward(float newAngle);
 		
 	private:
 		float viewCamp;
 		int viewCounter;
 		float lastViewX, lastViewZ;
 		bool canSeePlayer;
-		
+		int nBullets = 5;
 		
 		float speed;
 		float posX, posZ;
@@ -55,6 +60,8 @@ class Tank {
 		bool atDestination;
 		float boostSpeed, boostPower;
 		float recoilStrength, recoilDistance, curRecoilForce;
+		int shieldStrength;
+		float shieldOpacity;
 
 	
 };
