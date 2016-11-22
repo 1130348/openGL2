@@ -16,7 +16,7 @@ GLboolean   TPS;
 GLboolean   TARGET;
 GLboolean   GRID;
 GLboolean   AJUDA;
-
+GLboolean paused;
 
 int main(int argc, char** argv) {
 
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 	GRID = GL_TRUE;
 	TARGET = GL_TRUE;
 	AJUDA = GL_FALSE;
-
+	paused = GL_FALSE;
 
 	//Initialize GLUT
 	glutInit(&argc, argv);
@@ -39,23 +39,27 @@ int main(int argc, char** argv) {
 	glutCreateWindow("World of Tanks");
 	initRendering();
 
-	//Set handler functions
+
+	
+	inicia();
+	
 	glutDisplayFunc(drawScene);
+	glutTimerFunc(25, timer, 0);
+	
+
 	glutKeyboardFunc(handleKeypress);
 	glutKeyboardUpFunc(handleKeyUp);
 	glutMotionFunc(handleActiveMouse);
 	glutPassiveMotionFunc(handlePassiveMouse);
-	glutReshapeFunc(Reshape);
+
 	glutIgnoreKeyRepeat(true);
-	if (isFullscreen){
+	if (isFullscreen) {
 		glutSetCursor(GLUT_CURSOR_NONE);
 	}
 	glutMouseFunc(playerFire);
-	glutIgnoreKeyRepeat(1);
+
+	glutReshapeFunc(Reshape);
 	
-	inicia();
-	
-	glutTimerFunc(25, timer, 0);
 	glutMainLoop();
 	return 0;
 }
@@ -82,38 +86,44 @@ void initRendering() {
 void timer(int n) {
 
 	checkInput();
-	checkFire();
-	slowMotionCounter++;
-	if (slowMotionCounter >= slowMotionMagnitude) {
-		for (int i = 0; i < tanks.size(); i++) {
-			tanks[i]->move();
-			tanks[i]->runTanksBots();
-			slowMotionCounter = 0;
-		}
-	}
 
-	if (playerTank->isDead() && (!invincibility)) {
-		
-	}
-	if (numTanks <= 0) {
-		
-	}
-	playerTank->move();
+	if (!paused) {
+		checkFire();
+		slowMotionCounter++;
+
+		if (slowMotionCounter >= slowMotionMagnitude) {
+			for (unsigned int i = 0; i < tanks.size(); i++) {
+				tanks[i]->move();
+				tanks[i]->runTanksBots();
+				slowMotionCounter = 0;
+			}
+		}
 	
-	bulletSpeed = bulletSpeedOriginal*(50.0f - slowMotionMagnitude) / 50.0f;
-	lagDistance *= 0.95;
-	screenShakeMagnitude *= 0.95;
-	zoomMagnitude *= 0.95;
-	glutPostRedisplay();
+		if (playerTank->isDead() && (!invincibility)) {
+		
+		}
+		if (numTanks <= 0) {
+		
+		}
+		playerTank->move();
+	
+		bulletSpeed = bulletSpeedOriginal*(50.0f - slowMotionMagnitude) / 50.0f;
+		lagDistance *= 0.95;
+		screenShakeMagnitude *= 0.95;
+		zoomMagnitude *= 0.95;	
+	
+		glutPostRedisplay();
+		
+	}
 	glutTimerFunc(25, timer, 0);
 }
 
 void checkFire() {
 	bool bulletNotDead = true;
-	for (int i = 0; i < bullets.size(); i++) {
+	for (unsigned int i = 0; i < bullets.size(); i++) {
 		bullets[i]->move();
 		bulletNotDead = true;
-		for (int j = 0; j < tanks.size() && bulletNotDead; j++) {
+		for (unsigned int j = 0; j < tanks.size() && bulletNotDead; j++) {
 			if (tanks[j]->isHitBy(bullets[i])) {
 				tanks[j]->damage(10);
 				bullets[i]->flagAsDead();
@@ -132,7 +142,7 @@ void checkFire() {
 		}
 	}
 
-	for (int i = 0; i < bullets.size(); i++) {
+	for (unsigned int i = 0; i < bullets.size(); i++) {
 		if (bullets[i]->isDead()) {
 			delete bullets[i];
 			bullets.erase(bullets.begin() + i);
@@ -233,15 +243,18 @@ void checkInput() {
 	}
 
 	if (keyDown['h']) {
-
+		
 		if (AJUDA) {
 			AJUDA = GL_FALSE;
+			paused = !paused;
 			//imprime_ajuda();
 		}
 		else {
 			AJUDA = GL_TRUE;
-
+				
 		}
+	
+		
 
 	}
 
@@ -309,7 +322,7 @@ void drawScene() {
 		drawBullets();
 		//drawPiramids();
 
-		for (int i = 0; i < tanks.size(); i++) {
+		for (unsigned int i = 0; i < tanks.size(); i++) {
 
 			glColor3f(1.0, 0, 1);
 			tanks[i]->buildTank();
@@ -356,6 +369,7 @@ void drawScene() {
 		printtext(520, 200, "G   - Grid ON/OFF");
 		printtext(520, 150, "U   - Target ON/OFF");
 		printtext(520, 100, "ESC - Sair");
+		paused = !paused;
 
 	}
 
@@ -379,7 +393,7 @@ void printtext(int x, int y,   string string)
 	glPushAttrib(GL_DEPTH_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glRasterPos2i(x, y);
-	for (int i = 0; i<string.size(); i++)
+	for (unsigned int i = 0; i<string.size(); i++)
 	{
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
 	}
@@ -488,7 +502,7 @@ void deleteTanks() {
 
 void drawBullets() {
 
-	for (int i = 0; i <bullets.size(); i++) {
+	for (unsigned int i = 0; i <bullets.size(); i++) {
 		bullets[i]->drawBullet();
 	}
 }
@@ -496,7 +510,7 @@ void drawBullets() {
 
 
 void cleanBullets() {
-	for (int i = 0; i < bullets.size(); i++) {
+	for (unsigned int i = 0; i < bullets.size(); i++) {
 		if (bullets[i]->isDead()) {
 			delete bullets[i];
 			bullets.erase(bullets.begin() + i);
