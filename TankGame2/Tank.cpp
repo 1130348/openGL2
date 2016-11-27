@@ -132,10 +132,11 @@ void Tank::move() {
 		this->speedZ *= 0.5f;
 	}
 
+
 	this->rotation += this->rotationSpeed;
-	/*this->turretRotation -= this->rotationSpeed;
+	this->turretRotation -= this->rotationSpeed;
 	this->turretRotation += this->turretRotationSpeed;
-	this->turretRotationSpeed *= 0.5f;*/
+	this->turretRotationSpeed *= 0.5f;
 	this->rotationSpeed *= 0.5f;
 	this->speed *= 0.8f;
 	this->boostSpeed *= 0.8f;
@@ -418,9 +419,9 @@ void desenhaCubo()
 	desenhaPoligono(vertices[5], vertices[4], vertices[0], vertices[1], cores[5]);
 }
 
-void desenhaTanque()
+void Tank::desenhaTanque()
 {
-
+	//Delete comment
 	glPushMatrix(); {
 		glTranslated(0, 0, ALTURA_BASE*0.5);
 		glScalef(LARGURA_BASE, COMPRIMENTO_BASE, ALTURA_BASE);
@@ -428,6 +429,7 @@ void desenhaTanque()
 	}glPopMatrix();
 	glPushMatrix(); {
 		glTranslated(0, 0, 1);
+		glRotatef(this->turretRotation, 0.0f, 0.0f, 1.0f);
 		glScalef(LARGURA_TORRE, COMPRIMENTO_TORRE, ALTURA_TORRE);
 		//glRotatef(20, 0, 0, 1);
 		desenhaCubo();

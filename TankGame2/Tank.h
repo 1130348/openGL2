@@ -25,6 +25,7 @@ class Tank {
 		float giveTurretRotation();
 		float giveTurretRotationSpeed();
 		float giveHealth();
+		void desenhaTanque();
 		void damage(int amount);
 		bool isDead();
 		bool fire();

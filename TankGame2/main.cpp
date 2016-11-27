@@ -29,6 +29,8 @@ int main(int argc, char** argv) {
 	AJUDA = GL_FALSE;
 	paused = GL_FALSE;
 
+
+
 	//Initialize GLUT
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -81,6 +83,29 @@ void initRendering() {
 	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
+	//Adiconado Light (FIX PLS)
+	// set the fog attributes
+	/*glFogf(GL_FOG_START, 1.0f);
+	glFogf(GL_FOG_END, 200.0f);
+	glFogfv(GL_FOG_COLOR, fogColour);
+	glFogi(GL_FOG_MODE, GL_EXP);
+	glFogf(GL_FOG_DENSITY, 0.1f);*/
+
+	// enable the fog
+	//glEnable(GL_FOG);
+
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_COLOR_MATERIAL);
+	//glEnable(GL_LIGHTING); //Enable lighting
+	//glEnable(GL_LIGHT0); //Enable light #0
+	//glEnable(GL_LIGHT1); //Enable light #1
+	//glEnable(GL_NORMALIZE); //Automatically normalize normals
+	//glShadeModel(GL_SMOOTH); //Enable smooth shading
+							 //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe
+
 }
 
 void timer(int n) {
@@ -174,6 +199,32 @@ void checkInput() {
 		playerTank->rotate(false);
 		playerTank->move();
 	}
+	if (keyDown['n']) {
+		//rodar torre dir
+		/*playerTank->rotateTurret(10);
+		playerTank->move();*/
+		if (playerTank->giveRotationSpeed() > 0.5f) {
+			playerTank->rotateTurret(1.0f);
+		}
+		else if (playerTank->giveRotationSpeed() < -0.5f) {
+			playerTank->rotateTurret(-1.0f);
+		}
+		playerTank->rotateTurret(1.5f);
+		lagDistance += 2.5;
+	}
+	if (keyDown['m']) {
+		//rodar torre esq
+		/*playerTank->rotateTurret(-10);
+		playerTank->move();*/
+		if (playerTank->giveRotationSpeed() > 0.5f) {
+			playerTank->rotateTurret(1.0f);
+		}
+		else if (playerTank->giveRotationSpeed() < -0.5f) {
+			playerTank->rotateTurret(-1.0f);
+		}
+		playerTank->rotateTurret(-1.5f);
+		lagDistance -= 2.5;
+	}
 	
 	if (keyDown['e']) {
 		zoomMagnitude += 0.02;
@@ -188,7 +239,7 @@ void checkInput() {
 		}
 	}
 
-	if (keyDown['x']) {
+	if (keyDown['x'] || leftMouseDown) {
 		if (playerTank->fire()) {
 			screenShakeMagnitude += 0.1f;
 		}
@@ -253,9 +304,6 @@ void checkInput() {
 			AJUDA = GL_TRUE;
 				
 		}
-	
-		
-
 	}
 
 	
@@ -376,7 +424,7 @@ void drawScene() {
 	glColor3f(1, 0, 0);
 	printtext(50, 50, "HEALTH: 100%");
 	printtext(50, 30, "1/5 RELOAD");
-
+	
 	glutSwapBuffers();
 }
 

@@ -1,1 +1,4 @@
-﻿
+﻿  Tank.cpp
+c:\users\renat\source\repos\sgrai_2016_2017\tankgame2\tank.cpp(370): warning C4018: '<': signed/unsigned mismatch
+  TankGame2.vcxproj -> C:\Users\renat\Source\Repos\sgrai_2016_2017\TankGame2\Debug\TankGame2.exe
+  TankGame2.vcxproj -> C:\Users\renat\Source\Repos\sgrai_2016_2017\TankGame2\Debug\TankGame2.pdb (Full PDB)
