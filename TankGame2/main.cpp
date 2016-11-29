@@ -10,9 +10,6 @@
 #include <GL/GLAux.h>
 #endif
 
-#include "mathlib.h"
-#include "studio.h"
-
 #pragma comment (lib,"glaux.lib")
 
 extern "C" int read_JPEG_file(const char *,char **,int *,int *,int *);
@@ -41,6 +38,9 @@ GLboolean   GRID;
 GLboolean   AJUDA;
 GLboolean paused;
 GLuint texName;
+GLuint texture; //the array for our texture
+
+GLfloat angle = 0.0;
 
 typedef struct {
 	int		sizeX, sizeY, bpp;
@@ -109,13 +109,18 @@ void inicia() {
 
 }
 
+void FreeTexture(GLuint texture) {
+	glDeleteTextures(1, &texture);
+}
+
+
 //Initializes 3D rendering
 void initRendering() {
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	/*glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glEnable(GL_TEXTURE_2D);
 
 	glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
@@ -129,7 +134,7 @@ void initRendering() {
 
 	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
 
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imagem.sizeX,imagem.sizeY,0,GL_RGB,GL_UNSIGNED_BYTE,imagem.data);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imagem.sizeX,imagem.sizeY,0,GL_RGB,GL_UNSIGNED_BYTE,imagem.data);*/
 
 	//Adiconado Light (FIX PLS)
 	// set the fog attrib
@@ -152,7 +157,24 @@ void initRendering() {
 	//glEnable(GL_LIGHT1); //Enable light #1
 	//glEnable(GL_NORMALIZE); //Automatically normalize normals
 	//glShadeModel(GL_SMOOTH); //Enable smooth shading
-							 //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe
+	//glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_POLYGON_STIPPLE);
+
+	read_JPEG_file("deserto.jpg", &imagem.data, &imagem.sizeX, &imagem.sizeY, &imagem.bpp);
+	//texture = LoadTexture("deserto.jpg", 256, 256); //load the texture
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	// when texture area is large, bilinear filter the first mipmap
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// build our texture mipmaps
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imagem.sizeX, imagem.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, imagem.data);
+	glEnable(GL_TEXTURE_2D); 
 
 
 }
@@ -402,7 +424,7 @@ void drawScene() {
 		}
 		else if (VistaTopo) {
 			//printf("VP \n");
-			gluLookAt(0.0, 20.0, 20.0, 0.0, 0.0,0.0, 0.0, 0.0, -1.0);
+			gluLookAt(0.0, 20.0, 70.0, 0.0, 0.0,0.0, 0.0, 0.0, -1.0);
 			glRotatef(screenShakeMagnitude, x, y, z);
 		}
 
@@ -414,8 +436,10 @@ void drawScene() {
 
 
 		if (GRID) {
-			glBindTexture(GL_TEXTURE_2D,texName);
-			desenhaChao(mapSize,texName);
+		
+			desenhaChao(mapSize,texture);
+			glDisable(GL_TEXTURE_2D);
+			//FreeTexture(texture);
 		}
 		drawBullets();
 		//drawPiramids();

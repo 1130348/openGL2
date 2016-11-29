@@ -444,6 +444,7 @@ void Tank::desenhaTanque()
 }
 
 void Tank::buildTank() {
+
 	glPushMatrix(); {
 		glTranslatef(this->posX, 0.0f, this->posZ);
 		glRotatef(this->rotation, 0.0f, 1.0f, 0.0f);
