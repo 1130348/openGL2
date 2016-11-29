@@ -26,6 +26,7 @@ extern int slowMotionCounter;
 extern float slowMotionDuration;
 
 extern int mapSize;
+extern int mapLimit;
 
 extern int lastMouseX;
 extern float lagDistance;

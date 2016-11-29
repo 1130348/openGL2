@@ -17,6 +17,7 @@ float slowMotionMagnitude = 0;
 int slowMotionCounter = 0;
 float slowMotionDuration = 20.0f;
 int mapSize = 70;
+int mapLimit = 50;
 bool invincibility = false;
 
 int lastMouseX = 770;

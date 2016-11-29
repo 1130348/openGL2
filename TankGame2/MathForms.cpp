@@ -96,6 +96,39 @@ void makeGrid(float size){
 	glEnd();
 }
 
+void desenhaChao(float size, GLuint textID){
+
+	glBindTexture(GL_TEXTURE_2D, textID);
+
+
+	GLfloat cores[][3] = { { 0.0,1.0,1.0 },
+	{ 1.0,0.0,0.0 },
+	{ 1.0,1.0,0.0 },
+	{ 0.0,1.0,0.0 },
+	{ 1.0,0.0,1.0 },
+	{ 0.0,0.0,1.0 },
+	{ 1.0,1.0,1.0 } };
+
+	GLfloat vertices[][3] = { { -size,0,size },
+	{ -size,0,-size },
+	{ size,0,-size },
+	{ size,0,size }};
+
+	glBegin(GL_QUADS);
+	
+	glTexCoord2f(1, 1);
+	glVertex3fv(vertices[0]);
+	glTexCoord2f(0, 1);
+	glVertex3fv(vertices[1]);
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices[2]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices[3]);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
 float distanceBetween(float x1, float z1, float x2, float z2){
 	return sqrt((x2-x1)*(x2-x1) + (z2-z1)*(z2-z1));
 }

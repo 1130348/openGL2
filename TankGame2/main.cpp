@@ -1,6 +1,29 @@
 #include <ctime>
 #include "main.h"
 #include "GlobalDeclarations.h"
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+
+#pragma warning(disable:4996)
+#ifdef _WIN32
+#include <GL/GLAux.h>
+#endif
+
+#include "mathlib.h"
+#include "studio.h"
+
+#pragma comment (lib,"glaux.lib")
+
+extern "C" int read_JPEG_file(const char *,char **,int *,int *,int *);
+
+#define NOME_TEXTURA_CHAO	"deserto.jpg"
+#define NUM_TEXTURAS		1
+#define ID_TEXTURA_CHAO		1
+
+#define CHAO_DIMENSAO 70
+
+
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
@@ -17,6 +40,14 @@ GLboolean   TARGET;
 GLboolean   GRID;
 GLboolean   AJUDA;
 GLboolean paused;
+GLuint texName;
+
+typedef struct {
+	int		sizeX, sizeY, bpp;
+	char	*data;
+}JPGImage;
+
+JPGImage imagem;
 
 int main(int argc, char** argv) {
 
@@ -80,11 +111,28 @@ void inicia() {
 
 //Initializes 3D rendering
 void initRendering() {
-	
+
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glEnable(GL_TEXTURE_2D);
+
+	glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+
+	
+	glGenTextures(1,&texName);
+
+	read_JPEG_file("deserto.jpg", &imagem.data, &imagem.sizeX, &imagem.sizeY, &imagem.bpp);
+
+	glBindTexture(GL_TEXTURE_2D,texName);
+
+	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imagem.sizeX,imagem.sizeY,0,GL_RGB,GL_UNSIGNED_BYTE,imagem.data);
+
 	//Adiconado Light (FIX PLS)
-	// set the fog attributes
+	// set the fog attrib
 	/*glFogf(GL_FOG_START, 1.0f);
 	glFogf(GL_FOG_END, 200.0f);
 	glFogfv(GL_FOG_COLOR, fogColour);
@@ -105,6 +153,7 @@ void initRendering() {
 	//glEnable(GL_NORMALIZE); //Automatically normalize normals
 	//glShadeModel(GL_SMOOTH); //Enable smooth shading
 							 //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe
+
 
 }
 
@@ -365,7 +414,8 @@ void drawScene() {
 
 
 		if (GRID) {
-			makeGrid(mapSize);
+			glBindTexture(GL_TEXTURE_2D,texName);
+			desenhaChao(mapSize,texName);
 		}
 		drawBullets();
 		//drawPiramids();

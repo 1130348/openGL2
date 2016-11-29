@@ -364,7 +364,7 @@ int Tank::giveShieldStrength() {
 }
 
 bool Tank::canMoveTo(float newX, float newZ) {
-	if (newX > mapSize - 1.0f || newX < -mapSize + 1.0f || newZ > mapSize - 1.0f || newZ < -mapSize + 1.0f) {
+	if (newX > mapLimit - 1.0f || newX < -mapLimit + 1.0f || newZ > mapLimit - 1.0f || newZ < -mapLimit + 1.0f) {
 		return false;
 	}
 	for (int i = 0; i < tanks.size(); i++) {
