@@ -12,7 +12,7 @@ Bullet::Bullet(float positionX, float positionY, float positionZ, float velX, fl
 	this->posX = positionX;
 	this->posY = positionY;
 	this->posZ = positionZ;
-	this->remainingLife = 500;
+	this->remainingLife = 200;
 }
 
 void Bullet::drawBullet() {

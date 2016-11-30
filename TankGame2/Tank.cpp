@@ -11,7 +11,7 @@
 #define COMPRIMENTO_TORRE   2
 #define ALTURA_TORRE        0.5
 
-#define COMPRIMENTO_CANHAO  4
+#define COMPRIMENTO_CANHAO  5
 #define RAIO_CANHAO         0.2
 
 Tank::Tank(float positionX, float positionZ, float initialRotation) {
@@ -25,11 +25,11 @@ Tank::Tank(float positionX, float positionZ, float initialRotation) {
 	this->depth = 0.7f;
 	this->turretRotation = 0.0f;
 	this->turretRotationSpeed = 0.0f;
-	this->health = 3;
+	this->health = 60;
 	this->reloadTime = 20;
 	this->reloadCounter = this->reloadTime;
 	this->canSeePlayer = false;
-	this->viewCamp = 500.0f;
+	this->viewCamp = 100.0f;
 	this->viewCounter = 0;
 	this->isAimed = false;
 	this->destinX = positionX;
@@ -96,7 +96,7 @@ void Tank::rotateTurret(float amount) {
 bool Tank::fire() {
 	if (this->reloadCounter <= 0) {
 		float angle = this->rotation + this->turretRotation;
-		bullets.push_back(new Bullet(this->posX - 1.0*sin(angle * PI / 180),0.2f,this->posZ - 1.0*cos(angle * PI / 180), this->speedX, this->speedZ,angle));
+		bullets.push_back(new Bullet(this->posX-1.0f*sin(angle * PI / 180),1.0f,(this->posZ-1.0f *cos(angle * PI / 180)), this->speedX, this->speedZ,angle));
 		this->reloadCounter = this->reloadTime;
 		this->curRecoilForce += this->recoilStrength;
 		return true;
@@ -410,7 +410,8 @@ void desenhaCubo()
 	{ 1.0,0.0,1.0 },
 	{ 0.0,0.0,1.0 },
 	{ 1.0,1.0,1.0 } };
-
+	
+	
 	desenhaPoligono(vertices[1], vertices[0], vertices[3], vertices[2], cores[0]);
 	desenhaPoligono(vertices[2], vertices[3], vertices[7], vertices[6], cores[1]);
 	desenhaPoligono(vertices[3], vertices[0], vertices[4], vertices[7], cores[2]);
@@ -444,6 +445,7 @@ void Tank::desenhaTanque()
 }
 
 void Tank::buildTank() {
+	
 
 	glPushMatrix(); {
 		glTranslatef(this->posX, 0.0f, this->posZ);

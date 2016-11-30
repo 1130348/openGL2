@@ -39,7 +39,6 @@ GLboolean   AJUDA;
 GLboolean paused;
 GLuint texName;
 GLuint texture; //the array for our texture
-
 GLfloat angle = 0.0;
 
 typedef struct {
@@ -48,6 +47,9 @@ typedef struct {
 }JPGImage;
 
 JPGImage imagem;
+JPGImage imagem1;
+GLuint numBalas = 5;
+GLuint life = 100;
 
 int main(int argc, char** argv) {
 
@@ -72,8 +74,6 @@ int main(int argc, char** argv) {
 	glutCreateWindow("World of Tanks");
 	initRendering();
 
-
-	
 	inicia();
 	
 	glutDisplayFunc(drawScene);
@@ -100,6 +100,8 @@ int main(int argc, char** argv) {
 void inicia() {
 
 	deleteTanks();
+	numBalas = 5;
+	life = 100;
 	playerTank = new Tank(0.0f, 0.0f, 0.0f);
 	playerTank->setHealth(playerHealth);
 	srand(time(0));
@@ -174,13 +176,15 @@ void initRendering() {
 	// build our texture mipmaps
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imagem.sizeX, imagem.sizeY,
 		GL_RGB, GL_UNSIGNED_BYTE, imagem.data);
-	glEnable(GL_TEXTURE_2D); 
-
-
+	glEnable(GL_TEXTURE_2D);
 }
 
 void timer(int n) {
 
+	if (numBalas == 0) {
+		printtext(50, 30, "A recarregar...");
+		numBalas = 5;
+	}
 	checkInput();
 
 	if (!paused) {
@@ -196,10 +200,8 @@ void timer(int n) {
 		}
 	
 		if (playerTank->isDead() && (!invincibility)) {
-		
-		}
-		if (numTanks <= 0) {
-		
+			
+			paused = true;
 		}
 		playerTank->move();
 	
@@ -215,26 +217,40 @@ void timer(int n) {
 }
 
 void checkFire() {
+	
 	bool bulletNotDead = true;
 	for (unsigned int i = 0; i < bullets.size(); i++) {
 		bullets[i]->move();
 		bulletNotDead = true;
 		for (unsigned int j = 0; j < tanks.size() && bulletNotDead; j++) {
 			if (tanks[j]->isHitBy(bullets[i])) {
-				tanks[j]->damage(10);
+				tanks[j]->damage(30);
 				bullets[i]->flagAsDead();
 				bulletNotDead = false;
 			}
 		}
 		if (bulletNotDead && playerTank->isHitBy(bullets[i])) {
-			if (playerTank->hasShieldLeft()) {
-				playerTank->activateShield();
-			}
-			else if (!invincibility) {
-				playerTank->damage(10);
-				screenShakeMagnitude += 1.0f;
+			
+			 if (!invincibility) {
+				 if (life >= 2) {
+					 playerTank->damage(2);
+					 life -= 2;
+					 screenShakeMagnitude += 1.0f;
+				 }
+				 else {
+					 paused = true;
+				 }
+				
 			}
 			bullets[i]->flagAsDead();
+		}
+	}
+
+	for (int i = 0; i < tanks.size(); i++) {
+		if (tanks[i]->isDead()) {
+			delete tanks[i];
+			tanks.erase(tanks.begin() + i);
+			numTanks--;
 		}
 	}
 
@@ -264,10 +280,13 @@ void checkInput() {
 	}
 	if (keyDown['a']) {
 		playerTank->rotate(true);
+		playerTank->rotateTurret(1.0f);
 		playerTank->move();
 	}
 	if (keyDown['d']) {
 		playerTank->rotate(false);
+		playerTank->rotateTurret(-1.0f);
+		
 		playerTank->move();
 	}
 	if (keyDown['n']) {
@@ -312,10 +331,12 @@ void checkInput() {
 
 	if (keyDown['x'] || leftMouseDown) {
 		if (playerTank->fire()) {
+			numBalas--;
 			screenShakeMagnitude += 0.1f;
 		}
 	}
 	if (keyDown['r']) {
+		paused = false;
 		inicia();
 	}
 	if (keyDown['p']) {
@@ -496,8 +517,8 @@ void drawScene() {
 	}
 
 	glColor3f(1, 0, 0);
-	printtext(50, 50, "HEALTH: 100%");
-	printtext(50, 30, "1/5 RELOAD");
+	printtext(50, 50, "HEALTH:"+std::to_string(life)+"%");
+	printtext(50, 30, std::to_string(numBalas)+"/5 RELOAD");
 	
 	glutSwapBuffers();
 }

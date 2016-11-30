@@ -1,3 +1,5 @@
 ﻿  main.cpp
-  TankGame2.vcxproj -> C:\Users\renat\Source\Repos\sgrai_2016_2017\TankGame2\Debug\TankGame2.exe
-  TankGame2.vcxproj -> C:\Users\renat\Source\Repos\sgrai_2016_2017\TankGame2\Debug\TankGame2.pdb (Full PDB)
+c:\users\asus\desktop\sgrai\sgrai-rep\tankgame2\main.cpp(249): warning C4018: '<': signed/unsigned mismatch
+Bullet.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
+  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI-REP\TankGame2\Debug\TankGame2.exe
+  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI-REP\TankGame2\Debug\TankGame2.pdb (Full PDB)
