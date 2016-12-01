@@ -445,7 +445,7 @@ void Tank::desenhaTanque()
 		//glRotatef(, 1, 0, 0);
 
 		glTranslated(0, 1, 0);
-		glScalef(RAIO_CANHAO, COMPRIMENTO_CANHAO, RAIO_CANHAO);
+		glScalef(RAIO_CANHAO, COMPRIMENTO_CANHAO-2, RAIO_CANHAO);
 		desenhaCubo();
 	}glPopMatrix();
 }

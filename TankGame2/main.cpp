@@ -38,9 +38,11 @@ GLboolean   TPS;
 GLboolean   TARGET;
 GLboolean   GRID;
 GLboolean   AJUDA;
+GLboolean   FULL;
 GLboolean paused;
+GLboolean dead;
 GLuint texName;
-GLuint texture; //the array for our texture
+GLuint texture[3]; //the array for our texture
 GLfloat angle = 0.0;
 
 typedef struct {
@@ -62,7 +64,9 @@ int main(int argc, char** argv) {
 	GRID = GL_TRUE;
 	TARGET = GL_TRUE;
 	AJUDA = GL_FALSE;
+	FULL = GL_FALSE;
 	paused = GL_FALSE;
+	dead = GL_FALSE;
 
 
 
@@ -101,7 +105,7 @@ int main(int argc, char** argv) {
 }
 
 void inicia() {
-
+	dead = false;
 	deleteTanks();
 	numBalas = 5;
 	life = 100;
@@ -116,6 +120,25 @@ void inicia() {
 
 void FreeTexture(GLuint texture) {
 	glDeleteTextures(1, &texture);
+}
+
+
+void loadTexture(GLuint texture, const char* filename)
+{
+	JPGImage image;
+	read_JPEG_file(filename, &image.data, &image.sizeX, &image.sizeY, &image.bpp);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, image.sizeX, image.sizeY, GL_RGB, GL_UNSIGNED_BYTE, image.data);
 }
 
 
@@ -150,23 +173,14 @@ void initRendering() {
 	//glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_POLYGON_STIPPLE);
 
-	read_JPEG_file("deserto.jpg", &imagem.data, &imagem.sizeX, &imagem.sizeY, &imagem.bpp);
+	//texture = new GLuint[3];
 	//texture = LoadTexture("deserto.jpg", 256, 256); //load the texture
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glGenTextures(3, texture);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
-	// when texture area is large, bilinear filter the first mipmap
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_CLAMP);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_CLAMP);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	// build our texture mipmaps
-	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imagem.sizeX, imagem.sizeY,
-		GL_RGB, GL_UNSIGNED_BYTE, imagem.data);
+	loadTexture(texture[0], "deserto.jpg");
+	loadTexture(texture[1], "parede.jpg");
+
 	glEnable(GL_TEXTURE_2D);
 }
 
@@ -204,6 +218,12 @@ void timer(int n) {
 	glutTimerFunc(25, timer, 0);
 }
 
+void setPause()
+{
+	Sleep(2000);
+	paused = true;
+}
+
 void checkFire() {
 	
 	bool bulletNotDead = true;
@@ -226,7 +246,9 @@ void checkFire() {
 					 screenShakeMagnitude += 1.0f;
 				 }
 				 else {
-					 paused = true;
+					 //inicia();
+					 dead = true;
+					 
 				 }
 				
 			}
@@ -252,9 +274,12 @@ void checkFire() {
 
 
 
+
+
 void checkInput() {
 	
 	if (keyDown[27]) {
+		//delete textures cleanup();
 		exit(0);
 	}
 	if (keyDown['w']) {
@@ -372,6 +397,21 @@ void checkInput() {
 			TARGET = GL_TRUE;
 		}
 	}
+	if (keyDown['f']) {
+		if (FULL) {
+			FULL = GL_FALSE;
+			glutReshapeWindow(glutGet(GLUT_SCREEN_WIDTH) - 200, glutGet(GLUT_SCREEN_HEIGHT) - 200);
+			glutPositionWindow(GLUT_SCREEN_HEIGHT / 2, GLUT_SCREEN_WIDTH / 2);
+	
+			
+		}
+		else {
+			glutFullScreen();
+			FULL = GL_TRUE;
+		}
+
+		
+	}
 
 	if (keyDown['h']) {
 		
@@ -412,9 +452,10 @@ void drawScene() {
 	glPushMatrix();
 
 
-		float x = 0; 
-		float y = 0;
-		float z = 0;
+	float x = 0; 
+	float y = 0;
+	float z = 0;
+
 	if (TPS) {
 			//printf("TPS \n");
 
@@ -446,9 +487,12 @@ void drawScene() {
 
 		if (GRID) {
 		
-			desenhaChao(mapSize,texture);
-
-			desenhaParedes(mapSize, texture);
+			desenhaChao(mapSize,texture[0]);
+			/*read_JPEG_file("parede.jpg", &imagem1.data, &imagem1.sizeX, &imagem1.sizeY, &imagem1.bpp);
+			glBindTexture(GL_TEXTURE_2D, texture[1]);
+			gluBuild2DMipmaps(GL_TEXTURE_2D, 1, imagem1.sizeX, imagem1.sizeY,
+				GL_RGB, GL_UNSIGNED_BYTE, imagem1.data);*/
+			desenhaParedes(mapSize, texture[1]);
 			
 			//FreeTexture(texture);
 		}
@@ -481,14 +525,22 @@ void drawScene() {
 			}
 		glPopMatrix();
 		glColor3f(0, 2.0f, 0.3f);
-		playerTank->buildTank();
 		glDisable(GL_TEXTURE_2D);
+		playerTank->buildTank();
+		//glDisable(GL_TEXTURE_2D);
 
 	glPopMatrix();
 	
 	glDisable(GL_LIGHTING);
 	//drawHealthBars();
-	
+
+	if (dead) {
+
+		glColor3f(0, 0, 0);
+		printtext(520, 150, "GAMEOVER");
+		printtext(520, 100, "Press R to Play Again");
+		paused = true;
+	}
 
 	if (AJUDA) {
 
