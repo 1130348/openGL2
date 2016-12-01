@@ -450,8 +450,10 @@ void Tank::desenhaTanque()
 	}glPopMatrix();
 }
 
-void Tank::buildTank() {
+void Tank::buildTank(GLuint textID) {
 	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textID);
 
 	glPushMatrix(); {
 		glTranslatef(this->posX, 0.0f, this->posZ);

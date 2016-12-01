@@ -119,7 +119,7 @@ void inicia() {
 }
 
 void FreeTexture(GLuint texture) {
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(3, &texture);
 }
 
 
@@ -180,6 +180,7 @@ void initRendering() {
 
 	loadTexture(texture[0], "deserto.jpg");
 	loadTexture(texture[1], "parede.jpg");
+	loadTexture(texture[2], "tanques.jpg");
 
 	glEnable(GL_TEXTURE_2D);
 }
@@ -488,21 +489,19 @@ void drawScene() {
 		if (GRID) {
 		
 			desenhaChao(mapSize,texture[0]);
-			/*read_JPEG_file("parede.jpg", &imagem1.data, &imagem1.sizeX, &imagem1.sizeY, &imagem1.bpp);
-			glBindTexture(GL_TEXTURE_2D, texture[1]);
-			gluBuild2DMipmaps(GL_TEXTURE_2D, 1, imagem1.sizeX, imagem1.sizeY,
-				GL_RGB, GL_UNSIGNED_BYTE, imagem1.data);*/
+		
 			desenhaParedes(mapSize, texture[1]);
 			
 			//FreeTexture(texture);
 		}
+		//glDisable(GL_TEXTURE_2D);
 		drawBullets();
 		//drawPiramids();
 
 		for (unsigned int i = 0; i < tanks.size(); i++) {
 
 			glColor3f(1.0, 0, 1);
-			tanks[i]->buildTank();
+			tanks[i]->buildTank(texture[2]);
 		}
 			glPushMatrix();
 
@@ -526,7 +525,7 @@ void drawScene() {
 		glPopMatrix();
 		glColor3f(0, 2.0f, 0.3f);
 		glDisable(GL_TEXTURE_2D);
-		playerTank->buildTank();
+		playerTank->buildTank(texture[2]);
 		//glDisable(GL_TEXTURE_2D);
 
 	glPopMatrix();

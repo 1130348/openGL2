@@ -149,11 +149,11 @@ void desenhaParedes(float size, GLuint textID) {
 
 	glBegin(GL_QUADS);
 
-	glTexCoord2f(0, 0);
+	glTexCoord2f(1, 1);
 	glVertex3fv(vertices[0]);
 	glTexCoord2f(1, 0);
 	glVertex3fv(vertices[1]);
-	glTexCoord2f(1, 1);
+	glTexCoord2f(0, 0);
 	glVertex3fv(vertices[2]);
 	glTexCoord2f(0, 1);
 	glVertex3fv(vertices[3]);
@@ -166,11 +166,11 @@ void desenhaParedes(float size, GLuint textID) {
 
 	glBegin(GL_QUADS);
 
-	glTexCoord2f(0, 0);
+	glTexCoord2f(1, 1);
 	glVertex3fv(vertices2[0]);
 	glTexCoord2f(1, 0);
 	glVertex3fv(vertices2[1]);
-	glTexCoord2f(1, 1);
+	glTexCoord2f(0, 0);
 	glVertex3fv(vertices2[2]);
 	glTexCoord2f(0, 1);
 	glVertex3fv(vertices2[3]);
@@ -183,13 +183,13 @@ void desenhaParedes(float size, GLuint textID) {
 
 	glBegin(GL_QUADS);
 
-	glTexCoord2f(0, 0);
-	glVertex3fv(vertices3[0]);
-	glTexCoord2f(1, 0);
-	glVertex3fv(vertices3[1]);
-	glTexCoord2f(1, 1);
-	glVertex3fv(vertices3[2]);
 	glTexCoord2f(0, 1);
+	glVertex3fv(vertices3[0]);
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices3[1]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices3[2]);
+	glTexCoord2f(1, 1);
 	glVertex3fv(vertices3[3]);
 	glEnd();
 
@@ -200,13 +200,13 @@ void desenhaParedes(float size, GLuint textID) {
 
 	glBegin(GL_QUADS);
 
-	glTexCoord2f(0, 0);
-	glVertex3fv(vertices4[0]);
-	glTexCoord2f(1, 0);
-	glVertex3fv(vertices4[1]);
-	glTexCoord2f(1, 1);
-	glVertex3fv(vertices4[2]);
 	glTexCoord2f(0, 1);
+	glVertex3fv(vertices4[0]);
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices4[1]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices4[2]);
+	glTexCoord2f(1, 1);
 	glVertex3fv(vertices4[3]);
 	glEnd();
 

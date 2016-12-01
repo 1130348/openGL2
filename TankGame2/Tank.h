@@ -12,7 +12,7 @@ class Tank {
 		void rotate(bool directionIsPositive);
 		void rotateTurret(float amount);
 		void move();
-		void buildTank();
+		void buildTank(GLuint textID);
 		void runTanksBots();
 		bool isHitBy(Bullet* theBullet);
 		
