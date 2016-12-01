@@ -382,12 +382,18 @@ bool Tank::canMoveTo(float newX, float newZ) {
 
 void desenhaPoligono(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloat cor[])
 {
+	/*glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textID);*/
 
 	glBegin(GL_POLYGON);
 	glColor3fv(cor);
+	glTexCoord2f(0, 0);
 	glVertex3fv(a);
+	glTexCoord2f(1, 0);
 	glVertex3fv(b);
+	glTexCoord2f(1, 1);
 	glVertex3fv(c);
+	glTexCoord2f(0, 1);
 	glVertex3fv(d);
 	glEnd();
 }

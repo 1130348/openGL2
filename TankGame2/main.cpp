@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <iostream>       // std::cout
+#include <thread>
 
 #pragma warning(disable:4996)
 #ifdef _WIN32
@@ -84,12 +86,13 @@ int main(int argc, char** argv) {
 	glutKeyboardUpFunc(handleKeyUp);
 	glutMotionFunc(handleActiveMouse);
 	glutPassiveMotionFunc(handlePassiveMouse);
+	glutMouseFunc(playerFire);
 
 	glutIgnoreKeyRepeat(true);
 	if (isFullscreen) {
 		glutSetCursor(GLUT_CURSOR_NONE);
 	}
-	glutMouseFunc(playerFire);
+
 
 	glutReshapeFunc(Reshape);
 	
@@ -122,43 +125,27 @@ void initRendering() {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
 
-	/*glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glEnable(GL_TEXTURE_2D);
-
-	glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-
-	
-	glGenTextures(1,&texName);
-
-	read_JPEG_file("deserto.jpg", &imagem.data, &imagem.sizeX, &imagem.sizeY, &imagem.bpp);
-
-	glBindTexture(GL_TEXTURE_2D,texName);
-
-	glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
-
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imagem.sizeX,imagem.sizeY,0,GL_RGB,GL_UNSIGNED_BYTE,imagem.data);*/
-
 	//Adiconado Light (FIX PLS)
 	// set the fog attrib
-	/*glFogf(GL_FOG_START, 1.0f);
+	glFogf(GL_FOG_START, 1.0f);
 	glFogf(GL_FOG_END, 200.0f);
 	glFogfv(GL_FOG_COLOR, fogColour);
 	glFogi(GL_FOG_MODE, GL_EXP);
-	glFogf(GL_FOG_DENSITY, 0.1f);*/
+	glFogf(GL_FOG_DENSITY, 0.1f);
 
 	// enable the fog
 	//glEnable(GL_FOG);
 
-	//glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_COLOR_MATERIAL);
-	//glEnable(GL_LIGHTING); //Enable lighting
-	//glEnable(GL_LIGHT0); //Enable light #0
-	//glEnable(GL_LIGHT1); //Enable light #1
-	//glEnable(GL_NORMALIZE); //Automatically normalize normals
-	//glShadeModel(GL_SMOOTH); //Enable smooth shading
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_LIGHTING); //Enable lighting
+	glEnable(GL_LIGHT0); //Enable light #0
+	glEnable(GL_LIGHT1); //Enable light #1
+	glEnable(GL_NORMALIZE); //Automatically normalize normals
+	glShadeModel(GL_SMOOTH); //Enable smooth shading
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe
 	//glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_POLYGON_STIPPLE);
@@ -172,7 +159,11 @@ void initRendering() {
 
 	// when texture area is large, bilinear filter the first mipmap
 	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_CLAMP);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	// build our texture mipmaps
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imagem.sizeX, imagem.sizeY,
 		GL_RGB, GL_UNSIGNED_BYTE, imagem.data);
@@ -181,10 +172,7 @@ void initRendering() {
 
 void timer(int n) {
 
-	if (numBalas == 0) {
-		printtext(50, 30, "A recarregar...");
-		numBalas = 5;
-	}
+	
 	checkInput();
 
 	if (!paused) {
@@ -459,7 +447,9 @@ void drawScene() {
 		if (GRID) {
 		
 			desenhaChao(mapSize,texture);
-			glDisable(GL_TEXTURE_2D);
+
+			desenhaParedes(mapSize, texture);
+			
 			//FreeTexture(texture);
 		}
 		drawBullets();
@@ -492,13 +482,13 @@ void drawScene() {
 		glPopMatrix();
 		glColor3f(0, 2.0f, 0.3f);
 		playerTank->buildTank();
+		glDisable(GL_TEXTURE_2D);
 
 	glPopMatrix();
 	
-	//glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
 	//drawHealthBars();
-	//glEnable(GL_LIGHTING);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 
 	if (AJUDA) {
 
@@ -518,8 +508,31 @@ void drawScene() {
 
 	glColor3f(1, 0, 0);
 	printtext(50, 50, "HEALTH:"+std::to_string(life)+"%");
-	printtext(50, 30, std::to_string(numBalas)+"/5 RELOAD");
 	
+	if (numBalas == 0) {
+		printtext(50, 30, "A recarregar...");
+		clock_t startTime = clock(); //Start timer
+		double secondsPassed;
+		double secondsToDelay = 3;
+		
+		bool flag = true;
+		while (flag)
+		{
+			secondsPassed = (clock() - startTime) / CLOCKS_PER_SEC;
+			if (secondsPassed >= secondsToDelay)
+			{
+				numBalas = 5;
+				flag = false;
+			}
+		}
+		
+	}else{
+		printtext(50, 30, std::to_string(numBalas) + "/5 RELOAD");
+	}
+	
+	glEnable(GL_LIGHTING);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glutSwapBuffers();
 }
 
@@ -592,9 +605,24 @@ void handlePassiveMouse(int x, int y){
 	if (x <= 2 || x >= 1438){
 		glutWarpPointer(770, 450);
 		if (leftMouseDown){
-			playerFire(GLUT_LEFT_BUTTON, GLUT_DOWN, 0, 0);
+			if (playerTank->fire()) {
+				numBalas--;
+				screenShakeMagnitude += 0.1f;
+			}
 		}
 		lastMouseX = 770;
+	}
+}
+
+void playerFire(int button, int state, int x, int y) {
+	if (button == GLUT_LEFT_BUTTON) {
+		if (state == GLUT_DOWN) {
+			leftMouseDown = true;
+		}
+		else {
+			leftMouseDown = false;
+		}
+
 	}
 }
 
@@ -613,9 +641,6 @@ void Reshape(int width, int height)
 	screenHeight = height;
 }
 
-void playerFire(int button, int state, int x, int y){
-	
-}
 
 void createTank(int numTanks){
 	

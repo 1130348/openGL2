@@ -116,14 +116,98 @@ void desenhaChao(float size, GLuint textID){
 
 	glBegin(GL_QUADS);
 	
-	glTexCoord2f(-size,size);
+	glTexCoord2f(0, 0);
 	glVertex3fv(vertices[0]);
-	glTexCoord2f(-size,-size);
+	glTexCoord2f(1, 0);
 	glVertex3fv(vertices[1]);
-	glTexCoord2f(size,-size);
+	glTexCoord2f(1, 1);
 	glVertex3fv(vertices[2]);
-	glTexCoord2f(size, size);
+	glTexCoord2f(0, 1);
 	glVertex3fv(vertices[3]);
+	glEnd();
+
+
+}
+
+void desenhaParedes(float size, GLuint textID) {
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textID);
+
+	GLfloat cores[][3] = { { 0.0,1.0,1.0 },
+	{ 1.0,0.0,0.0 },
+	{ 1.0,1.0,0.0 },
+	{ 0.0,1.0,0.0 },
+	{ 1.0,0.0,1.0 },
+	{ 0.0,0.0,1.0 },
+	{ 1.0,1.0,1.0 } };
+
+	GLfloat vertices[][3] = { { -size,0,size },
+	{ -size,20,size },
+	{ -size,20,-size },
+	{ -size,0,-size } };
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices[0]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices[1]);
+	glTexCoord2f(1, 1);
+	glVertex3fv(vertices[2]);
+	glTexCoord2f(0, 1);
+	glVertex3fv(vertices[3]);
+	glEnd();
+
+	GLfloat vertices2[][3] = { { size,0,size },
+	{ size,20,size },
+	{ size,20,-size },
+	{ size,0,-size } };
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices2[0]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices2[1]);
+	glTexCoord2f(1, 1);
+	glVertex3fv(vertices2[2]);
+	glTexCoord2f(0, 1);
+	glVertex3fv(vertices2[3]);
+	glEnd();
+
+	GLfloat vertices3[][3] = { { size,0,size },
+	{ size,20,size },
+	{ -size,20,size },
+	{ -size,0,size } };
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices3[0]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices3[1]);
+	glTexCoord2f(1, 1);
+	glVertex3fv(vertices3[2]);
+	glTexCoord2f(0, 1);
+	glVertex3fv(vertices3[3]);
+	glEnd();
+
+	GLfloat vertices4[][3] = { { size,0,-size },
+	{ size,20,-size },
+	{ -size,20,-size },
+	{ -size,0,-size } };
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0, 0);
+	glVertex3fv(vertices4[0]);
+	glTexCoord2f(1, 0);
+	glVertex3fv(vertices4[1]);
+	glTexCoord2f(1, 1);
+	glVertex3fv(vertices4[2]);
+	glTexCoord2f(0, 1);
+	glVertex3fv(vertices4[3]);
 	glEnd();
 
 
