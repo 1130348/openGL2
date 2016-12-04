@@ -6,6 +6,7 @@
 #include <time.h>
 #include <iostream>       // std::cout
 #include <thread>
+#include <AL/alut.h>
 
 #pragma warning(disable:4996)
 #ifdef _WIN32
@@ -50,11 +51,26 @@ typedef struct {
 	char	*data;
 }JPGImage;
 
+typedef struct {
+	ALuint buffer, source;
+	ALboolean tecla_s;
+} Estado;
+
+
+
+#define MUSICA_DISPARO "disparo.wav"
+
+
+
 JPGImage imagem;
 JPGImage imagem1;
 GLuint numBalas = 5;
 GLuint life = 100;
+Estado estado;
 
+
+void readAudio(char* nomeMusica);
+void checkSound();
 int main(int argc, char** argv) {
 
 	DEBUG = GL_TRUE;
@@ -67,6 +83,11 @@ int main(int argc, char** argv) {
 	FULL = GL_FALSE;
 	paused = GL_FALSE;
 	dead = GL_FALSE;
+
+
+	alutInit(&argc, argv);
+	readAudio(MUSICA_DISPARO);
+
 
 
 
@@ -108,6 +129,7 @@ void inicia() {
 	dead = false;
 	deleteTanks();
 	numBalas = 5;
+	numTanks = 5;
 	life = 100;
 	playerTank = new Tank(0.0f, 0.0f, 0.0f);
 	playerTank->setHealth(playerHealth);
@@ -212,7 +234,12 @@ void timer(int n) {
 		lagDistance *= 0.95;
 		screenShakeMagnitude *= 0.95;
 		zoomMagnitude *= 0.95;	
-	
+
+
+		//Audio
+		checkSound();
+
+		
 		glutPostRedisplay();
 		
 	}
@@ -223,6 +250,19 @@ void setPause()
 {
 	Sleep(2000);
 	paused = true;
+}
+
+void checkSound() {
+	ALint state;
+	alGetSourcei(estado.source, AL_SOURCE_STATE, &state);
+	if (estado.tecla_s)
+	{
+		if (state != AL_PLAYING)
+			alSourcePlay(estado.source);
+	}
+	else
+		if (state == AL_PLAYING)
+			alSourceStop(estado.source);
 }
 
 void checkFire() {
@@ -256,6 +296,12 @@ void checkFire() {
 			bullets[i]->flagAsDead();
 		}
 	}
+	if (tanks.size() == 0) {
+			glColor3f(1, 0, 0);
+			printtext(520, 150, "YOU WIN");
+			printtext(520, 100, "Press R to Play Again");
+			paused = true;
+	}
 
 	for (int i = 0; i < tanks.size(); i++) {
 		if (tanks[i]->isDead()) {
@@ -273,10 +319,6 @@ void checkFire() {
 	}
 }
 
-
-
-
-
 void checkInput() {
 	
 	if (keyDown[27]) {
@@ -284,10 +326,11 @@ void checkInput() {
 		exit(0);
 	}
 	if (keyDown['w']) {
-		
 		playerTank->accelerate(true);
 		playerTank->move();
+		
 	}
+	
 	if (keyDown['s']) {
 		playerTank->accelerate(false);
 		playerTank->move();
@@ -343,12 +386,8 @@ void checkInput() {
 		}
 	}
 
-	if (keyDown['x'] || leftMouseDown) {
-		if (playerTank->fire()) {
-			numBalas--;
-			screenShakeMagnitude += 0.1f;
-		}
-	}
+
+	
 	if (keyDown['r']) {
 		paused = false;
 		inicia();
@@ -360,6 +399,7 @@ void checkInput() {
 		VistaTopo = GL_FALSE;
 		
 	}
+	
 
 	if (keyDown['t']) {
 
@@ -376,6 +416,15 @@ void checkInput() {
 		TPS = GL_FALSE;
 		VistaTopo = GL_TRUE;
 		
+	}
+	if (keyDown['x'] || leftMouseDown) {
+		if (playerTank->fire()) {
+			numBalas--;
+			screenShakeMagnitude += 0.1f;
+			estado.tecla_s = AL_TRUE;  //Audio Quando a tecla é largada passa a false
+		}
+		
+
 	}
 
 	if (keyDown['g']) {
@@ -426,21 +475,17 @@ void checkInput() {
 				
 		}
 	}
-
-	
-
-	
 }
-
-void handleKeypress(unsigned char key, int x, int y) {    
+void handleKeypress(unsigned char key, int x, int y) {
 	keyDown[key] = true;
-	//printf("Carregou na tecla %c\n", key);
 }
 
 void handleKeyUp(unsigned char key, int x, int y) {
-	keyDown[key] = false;
-	//printf("Carregou na tecla %c\n", key);
+	
+keyDown[key] = false;
+	
 }
+
 
 //Draws the 3D scene
 void drawScene() {
@@ -564,7 +609,7 @@ void drawScene() {
 		printtext(50, 30, "A recarregar...");
 		clock_t startTime = clock(); //Start timer
 		double secondsPassed;
-		double secondsToDelay = 3;
+		double secondsToDelay = 1;
 		
 		bool flag = true;
 		while (flag)
@@ -716,6 +761,7 @@ void deleteTanks() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	tanks.clear();
+	
 
 }
 
@@ -738,45 +784,18 @@ void cleanBullets() {
 
 }
 
-//void drawPiramids() {
-//	glEnable(GL_POINT_SMOOTH);
-//	glEnable(GL_LINE_SMOOTH);
-//	glEnable(GL_POLYGON_SMOOTH);
-//	glEnable(GL_DEPTH_TEST);
-//	GLfloat places[][3] = { { 4,1,4 },{ -5,1,1 },{ 9,1,6 },{ 6,1,-2 },{-1,1,4 },{-10,1,7},{-3,1,-5}};
-//
-//	for (int i = 0; i < 6; i++) {
-//		glPushMatrix(); {
-//			glScalef(7, 2, 2);
-//			
-//			glTranslatef( places[i][0], places[i][1],places[i][2]);
-//			makePyramid();
-//
-//		}glPopMatrix();
-//	}
-//}
-//
-//void makePyramid()
-//{
-//	glBegin(GL_TRIANGLES);
-//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(0.0f, 1.f, 0.0f);
-//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-//
-//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(0.0f, 1.0f, 0.0f);
-//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(0.0f, -1.0f, -1.0f);
-//
-//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(0.0f, 1.0f, 0.0f);
-//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(0.0f, -1.0f, -1.0f);
-//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-//
-//
-//	glColor3f(1.0f, 0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-//	glColor3f(0.0f, 1.0f, 0.0f); glVertex3f(0.0f, -1.0f, -1.0f);
-//	glColor3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-//
-//	glEnd();
-//
-//}
+void readAudio(char* nomeMusica) {
+
+	estado.buffer = alutCreateBufferFromFile(nomeMusica);
+	alGenSources(1, &estado.source);
+	alSourcei(estado.source, AL_BUFFER, estado.buffer);
+	estado.tecla_s = AL_FALSE;
+}
+
+	
+
+	
+
+
+
 

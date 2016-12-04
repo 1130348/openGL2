@@ -11,7 +11,7 @@ using namespace std;
 #ifndef _MAIN_H
 #define _MAIN_H
 
-void handleKeypress(unsigned char key, int x, int y);
+bool handleKeypress(unsigned char key);
 void Reshape(int w, int h);
 void handlePassiveMouse(int x, int y);
 void handleActiveMouse(int x, int y);
@@ -27,6 +27,7 @@ void resetPerspectiveProjection();
 void timer(int n);
 int main(int argc, char** argv);
 //void makeTank();
+void handleKeypress(unsigned char key, int x, int y);
 void handleKeyUp(unsigned char key, int x, int y);
 void checkInput();
 void playerFire(int button, int state, int x, int y);
@@ -35,8 +36,8 @@ void checkBullets();
 void drawBullets();
 void cleanBullets();
 void checkFire();
-void drawPiramids();
-void makePyramid();
+
+
 
 
 
