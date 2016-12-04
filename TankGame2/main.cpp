@@ -17,7 +17,7 @@ using namespace irrklang;
 
 #pragma comment (lib,"glaux.lib")
 
-extern "C" int read_JPEG_file(const char *,char **,int *,int *,int *);
+extern "C" int read_JPEG_file(const char *, char **, int *, int *, int *);
 
 #define NOME_TEXTURA_CHAO	"deserto.jpg"
 #define NUM_TEXTURAS		1
@@ -57,8 +57,6 @@ typedef struct {
 
 #define MUSICA_DISPARO "disparo.wav"
 
-
-
 JPGImage imagem;
 JPGImage imagem1;
 GLuint numBalas = 5;
@@ -66,12 +64,7 @@ GLuint life = 100;
 ISoundEngine* engine = createIrrKlangDevice();
 
 int frameCount = 0;
-
-//  Number of frames per second
 float fps2 = 0;
-
-//  currentTime - previousTime is the time elapsed
-//  between every call of the Idle function
 int currentTime = 0, previousTime = 0;
 
 int lastTick = clock();
@@ -83,7 +76,7 @@ int main(int argc, char** argv) {
 	TPS = GL_TRUE;
 	FPS = GL_FALSE;
 	VistaTopo = GL_FALSE;
-	GRID = GL_TRUE;
+	GRID = GL_FALSE;
 	TARGET = GL_TRUE;
 	AJUDA = GL_FALSE;
 	FULL = GL_FALSE;
@@ -91,30 +84,26 @@ int main(int argc, char** argv) {
 	dead = GL_FALSE;
 	FPSSHOW = GL_FALSE;
 
-	
 
 	if (!engine)
 		return 0; // error starting up the engine
 
-				  // play some sound stream, looped
 
 
-
-	//Initialize GLUT
+				  //Initialize GLUT
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(glutGet(GLUT_SCREEN_WIDTH) - 200, glutGet(GLUT_SCREEN_HEIGHT) - 200);
-	glutInitWindowPosition(GLUT_SCREEN_HEIGHT/2, GLUT_SCREEN_WIDTH / 2);
-	
+	glutInitWindowPosition(GLUT_SCREEN_HEIGHT / 2, GLUT_SCREEN_WIDTH / 2);
+
 	//Create the window
 	glutCreateWindow("World of Tanks");
 	initRendering();
 
 	inicia();
-	
+
 	glutDisplayFunc(drawScene);
 	glutTimerFunc(25, timer, 0);
-	
 
 	glutKeyboardFunc(handleKeypress);
 	glutKeyboardUpFunc(handleKeyUp);
@@ -129,14 +118,19 @@ int main(int argc, char** argv) {
 
 
 	glutReshapeFunc(Reshape);
-	
+
 	glutMainLoop();
 	return 0;
 }
 
 void inicia() {
+	engine->stopAllSounds();
+
+	engine->setSoundVolume(0.2);
+	engine->play2D("dese.mp3", true);
 	dead = false;
 	deleteTanks();
+
 	numBalas = 5;
 	numTanks = 5;
 	life = 100;
@@ -155,36 +149,25 @@ void FreeTexture(GLuint texture) {
 
 void calculateFPS()
 {
-	//  Increase frame count
+
 	frameCount++;
-
-	//  Get the number of milliseconds since glutInit called
-	//  (or first call to glutGet(GLUT ELAPSED TIME)).
 	currentTime = glutGet(GLUT_ELAPSED_TIME);
-
-	//  Calculate time passed
 	int timeInterval = currentTime - previousTime;
 
 	if (timeInterval > 1000)
 	{
-		//  calculate the number of frames per second
+
 		fps2 = frameCount / (timeInterval / 1000.0f);
-
-		//  Set time
 		previousTime = currentTime;
-
-		//  Reset frame count
 		frameCount = 0;
 	}
 }
 
 void drawFPS()
 {
-	//  Load the identity matrix so that FPS string being drawn
-	//  won't get animates
+
 	glLoadIdentity();
 
-	//  Print the FPS to the window
 	string str = std::to_string(fps2);
 	printtext(10, 800, str);
 }
@@ -201,8 +184,6 @@ void loadTexture(GLuint texture, const char* filename)
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -216,33 +197,25 @@ void initRendering() {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearColor(fogColour[0], fogColour[1], fogColour[2], fogColour[3]);
 
-	//Adiconado Light (FIX PLS)
-	// set the fog attrib
-	glFogf(GL_FOG_START, 1.0f);
-	glFogf(GL_FOG_END, 200.0f);
-	glFogfv(GL_FOG_COLOR, fogColour);
-	glFogi(GL_FOG_MODE, GL_EXP);
-	glFogf(GL_FOG_DENSITY, 0.1f);
 
-	// enable the fog
-	//glEnable(GL_FOG);
+	GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat mat_shininess[] = { 50.0 };
+	GLfloat light_position[] = { 1.0, 1.0, 0.0 };
 
-	glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-	glEnable(GL_DEPTH_TEST);
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	//glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_LIGHTING); //Enable lighting
 	glEnable(GL_LIGHT0); //Enable light #0
-	glEnable(GL_LIGHT1); //Enable light #1
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE); //Automatically normalize normals
 	glShadeModel(GL_SMOOTH); //Enable smooth shading
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe
-	//glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_POLYGON_STIPPLE);
 
-	//texture = new GLuint[3];
-	//texture = LoadTexture("deserto.jpg", 256, 256); //load the texture
 	glGenTextures(3, texture);
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
@@ -254,6 +227,8 @@ void initRendering() {
 }
 
 void timer(int n) {
+
+
 
 	calculateFPS();
 
@@ -270,34 +245,27 @@ void timer(int n) {
 				slowMotionCounter = 0;
 			}
 		}
-	
+
 		if (playerTank->isDead() && (!invincibility)) {
-			
+
 			paused = true;
 		}
 		playerTank->move();
-	
+
 		bulletSpeed = bulletSpeedOriginal*(50.0f - slowMotionMagnitude) / 50.0f;
 		lagDistance *= 0.95;
 		screenShakeMagnitude *= 0.95;
-		zoomMagnitude *= 0.95;	
+		zoomMagnitude *= 0.95;
 
-		
+
 		glutPostRedisplay();
-		
+
 	}
 	glutTimerFunc(25, timer, 0);
 }
 
-void setPause()
-{
-	Sleep(2000);
-	paused = true;
-}
-
-
 void checkFire() {
-	
+
 	bool bulletNotDead = true;
 	for (unsigned int i = 0; i < bullets.size(); i++) {
 		bullets[i]->move();
@@ -310,29 +278,24 @@ void checkFire() {
 			}
 		}
 		if (bulletNotDead && playerTank->isHitBy(bullets[i])) {
-			
-			 if (!invincibility) {
-				 if (life >= 2) {
-					 playerTank->damage(2);
-					 life -= 2;
-					 screenShakeMagnitude += 1.0f;
-				 }
-				 else {
-					 //inicia();
-					 dead = true;
-					 
-				 }
-				
+
+			if (!invincibility) {
+				if (life >= 2) {
+					playerTank->damage(2);
+					life -= 2;
+					screenShakeMagnitude += 1.0f;
+				}
+				else {
+
+					dead = true;
+
+				}
+
 			}
 			bullets[i]->flagAsDead();
 		}
 	}
-	if (tanks.size() == 0) {
-			glColor3f(1, 0, 0);
-			printtext(520, 150, "YOU WIN");
-			printtext(520, 100, "Press R to Play Again");
-			paused = true;
-	}
+
 
 	for (unsigned int i = 0; i < tanks.size(); i++) {
 		if (tanks[i]->isDead()) {
@@ -351,18 +314,18 @@ void checkFire() {
 }
 
 void checkInput() {
-	
+
 	if (keyDown[27]) {
-		//delete textures cleanup();
+
 		engine->drop();
 		exit(0);
 	}
 	if (keyDown['w']) {
 		playerTank->accelerate(true);
 		playerTank->move();
-		
+
 	}
-	
+
 	if (keyDown['s']) {
 		playerTank->accelerate(false);
 		playerTank->move();
@@ -375,13 +338,11 @@ void checkInput() {
 	if (keyDown['d']) {
 		playerTank->rotate(false);
 		playerTank->rotateTurret(-1.0f);
-		
+
 		playerTank->move();
 	}
 	if (keyDown['n']) {
-		//rodar torre dir
-		/*playerTank->rotateTurret(10);
-		playerTank->move();*/
+
 		if (playerTank->giveRotationSpeed() > 0.5f) {
 			playerTank->rotateTurret(1.0f);
 		}
@@ -392,9 +353,7 @@ void checkInput() {
 		lagDistance += 2.5;
 	}
 	if (keyDown['m']) {
-		//rodar torre esq
-		/*playerTank->rotateTurret(-10);
-		playerTank->move();*/
+
 		if (playerTank->giveRotationSpeed() > 0.5f) {
 			playerTank->rotateTurret(1.0f);
 		}
@@ -404,7 +363,7 @@ void checkInput() {
 		playerTank->rotateTurret(-1.5f);
 		lagDistance -= 2.5;
 	}
-	
+
 	if (keyDown['e']) {
 		zoomMagnitude += 0.02;
 	}
@@ -419,7 +378,7 @@ void checkInput() {
 	}
 
 
-	
+
 	if (keyDown['r']) {
 		paused = false;
 		inicia();
@@ -429,9 +388,9 @@ void checkInput() {
 		FPS = GL_TRUE;
 		TPS = GL_FALSE;
 		VistaTopo = GL_FALSE;
-		
+
 	}
-	
+
 
 	if (keyDown['t']) {
 
@@ -439,7 +398,7 @@ void checkInput() {
 		FPS = GL_FALSE;
 		TPS = GL_TRUE;
 		VistaTopo = GL_FALSE;
-	
+
 	}
 
 	if (keyDown['v']) {
@@ -447,16 +406,17 @@ void checkInput() {
 		FPS = GL_FALSE;
 		TPS = GL_FALSE;
 		VistaTopo = GL_TRUE;
-		
+
 	}
 	if (keyDown['x'] || leftMouseDown) {
+
 		if (playerTank->fire()) {
 			numBalas--;
 			screenShakeMagnitude += 0.1f;
 			engine->play2D("disparo.wav", false);
-			//estado.tecla_s = AL_TRUE;  //Audio Quando a tecla é largada passa a false
+
 		}
-		
+
 
 	}
 
@@ -485,27 +445,28 @@ void checkInput() {
 			FULL = GL_FALSE;
 			glutReshapeWindow(glutGet(GLUT_SCREEN_WIDTH) - 200, glutGet(GLUT_SCREEN_HEIGHT) - 200);
 			glutPositionWindow(GLUT_SCREEN_HEIGHT / 2, GLUT_SCREEN_WIDTH / 2);
-	
-			
+
+
 		}
 		else {
 			glutFullScreen();
 			FULL = GL_TRUE;
 		}
 
-		
+
 	}
 
 	if (keyDown['h']) {
-		
+
 		if (AJUDA) {
 			AJUDA = GL_FALSE;
 			paused = !paused;
-			//imprime_ajuda();
+
 		}
 		else {
 			AJUDA = GL_TRUE;
-				
+
+
 		}
 	}
 
@@ -525,9 +486,9 @@ void handleKeypress(unsigned char key, int x, int y) {
 }
 
 void handleKeyUp(unsigned char key, int x, int y) {
-	
-keyDown[key] = false;
-	
+
+	keyDown[key] = false;
+
 }
 
 
@@ -542,98 +503,105 @@ void drawScene() {
 	glPushMatrix();
 
 
-	float x = 0; 
+	float x = 0;
 	float y = 0;
 	float z = 0;
 
 	if (TPS) {
-			//printf("TPS \n");
 
-
-			glTranslatef(0.0f, -1.5f, -3.0f);
-			glRotatef(10, 1.0f, 0.0f, 0.0f);
-
-			glTranslatef(0.0f, -0.0f, -3.0f);
-			glRotatef(10, 1.0f, 0.0f, 0.0f);
-		}
-		else if (FPS) {
-			//printf("FPS \n");
-
-			glTranslatef(0.0f, -1.5f, 3.0f);
-			glRotatef(10, 1.0f, 0.0f, 0.0f);
-		}
-		else if (VistaTopo) {
-			//printf("VP \n");
-			gluLookAt(0.0, 20.0, 70.0, 0.0, 0.0,0.0, 0.0, 0.0, -1.0);
-			glRotatef(screenShakeMagnitude, x, y, z);
-		}
-
-		glRotatef(screenShakeMagnitude, x, y, z);
-		glTranslatef(0.0f, -1.5f, -6.0f);
+		glTranslatef(0.0f, -1.5f, -3.0f);
 		glRotatef(10, 1.0f, 0.0f, 0.0f);
-		glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
-		glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());
 
+		glTranslatef(0.0f, -0.0f, -3.0f);
+		glRotatef(10, 1.0f, 0.0f, 0.0f);
+	}
+	else if (FPS) {
 
-		if (GRID) {
-		
-			desenhaChao(mapSize,texture[0]);
-		
-			desenhaParedes(mapSize, texture[1]);
-			
-			//FreeTexture(texture);
-		}
-		glDisable(GL_TEXTURE_2D);
-		drawBullets();
-		glEnable(GL_TEXTURE_2D);
+		glTranslatef(0.0f, -1.5f, 3.0f);
+		glRotatef(10, 1.0f, 0.0f, 0.0f);
+	}
+	else if (VistaTopo) {
 
-		//drawPiramids();
+		gluLookAt(0.0, 20.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0);
+		glRotatef(screenShakeMagnitude, x, y, z);
+	}
 
-		for (unsigned int i = 0; i < tanks.size(); i++) {
+	glRotatef(screenShakeMagnitude, x, y, z);
+	glTranslatef(0.0f, -1.5f, -6.0f);
+	glRotatef(10, 1.0f, 0.0f, 0.0f);
+	glRotatef(-playerTank->giveRotation(), 0.0f, 1.0f, 0.0f);
+	glTranslatef(-playerTank->givePosX(), 0.0f, -playerTank->givePosZ());
 
-			glColor3f(1.0, 0, 1);
-			tanks[i]->buildTank(texture[2]);
-		}
-			glPushMatrix();
+	desenhaChao(mapSize, texture[0]);
 
-			glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
-			glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-			glColor3f(1,0 , 0);
-
-			if (TARGET) {
-				glDisable(GL_TEXTURE_2D);
-
-				float seperation = 3.0f;
-
-				for (int i = 1; i <= 10; i++) {
-					float bulletTravel = (-seperation*i) / bulletSpeed;
-					glPushMatrix();
-					glTranslatef(0.0f, 0.0f, -seperation*i);
-					glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
-					glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
-					glutSolidSphere(0.05f, 4, 4);
-					glPopMatrix();
-				}
-				glEnable(GL_TEXTURE_2D);
-
-			}
-		glPopMatrix();
-		glColor3f(0, 2.0f, 0.3f);
-		glDisable(GL_TEXTURE_2D);
-		playerTank->buildTank(texture[2]);
-		//glDisable(GL_TEXTURE_2D);
-
-	glPopMatrix();
-	
-	glDisable(GL_LIGHTING);
-	//drawHealthBars();
+	desenhaParedes(mapSize, texture[1]);
 	glDisable(GL_TEXTURE_2D);
 
+	if (GRID) {
+
+		makeGrid(mapSize);
+
+	}
+
+
+	drawBullets();
+	glEnable(GL_TEXTURE_2D);
+
+
+	for (unsigned int i = 0; i < tanks.size(); i++) {
+
+		glColor3f(1.0, 0, 1);
+		tanks[i]->buildTank(texture[2]);
+	}
+
+	glPushMatrix();
+
+	glTranslatef(playerTank->givePosX(), 1.0f, playerTank->givePosZ());
+	glRotatef(playerTank->giveRotation() + playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+	glColor3f(1, 0, 0);
+
+	if (TARGET) {
+		glDisable(GL_TEXTURE_2D);
+
+		float seperation = 3.0f;
+
+		for (int i = 1; i <= 10; i++) {
+			float bulletTravel = (-seperation*i) / bulletSpeed;
+			glPushMatrix();
+			glTranslatef(0.0f, 0.0f, -seperation*i);
+			glRotatef(-playerTank->giveRotation() - playerTank->giveTurretRotation(), 0.0f, 1.0f, 0.0f);
+			glTranslatef(-playerTank->giveSpeedX()*bulletTravel, 0.0f, -playerTank->giveSpeedZ()*bulletTravel);
+			glutSolidSphere(0.05f, 4, 4);
+			glPopMatrix();
+		}
+		glEnable(GL_TEXTURE_2D);
+
+	}
+
+	glPopMatrix();
+	glColor3f(0, 2.0f, 0.3f);
+	glDisable(GL_TEXTURE_2D);
+	playerTank->buildTank(texture[2]);
+
+	glPopMatrix();
+
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	if (tanks.size() == 0) {
+		glColor3f(0, 0, 0);
+		//engine->stopAllSounds();
+
+		printtext(520, 150, "YOU WIN!");
+		printtext(520, 100, "Press R to Play Again");
+		paused = true;
+	}
 
 	if (dead) {
 
 		glColor3f(0, 0, 0);
-		printtext(520, 150, "GAMEOVER");
+		//engine->stopAllSounds();
+		printtext(520, 150, "GAMEOVER!");
 		printtext(520, 100, "Press R to Play Again");
 		paused = true;
 	}
@@ -647,49 +615,40 @@ void drawScene() {
 
 		glColor3f(0, 0, 0);
 
-		printtext(520, 450, "Controlos:");
-		printtext(520, 400, "h,H - Ajuda ");
-		printtext(520, 350, "P   - Vista Primeira Pessoa");
-		printtext(520, 300, "T   - Vista De Topo");
-		printtext(520, 250, "V   - Vista Terceira Pessoa");
-		printtext(520, 200, "G   - Grid ON/OFF");
-		printtext(520, 150, "U   - Target ON/OFF");
-		printtext(520, 100, "ESC - Sair");
+		printtext(520, 650, "Controlos:");
+		printtext(520, 600, "h,H - Ajuda ");
+		printtext(520, 550, "P   - Vista Primeira Pessoa");
+		printtext(520, 500, "T   - Vista De Topo");
+		printtext(520, 450, "V   - Vista Terceira Pessoa");
+		printtext(520, 400, "G   - Grid ON/OFF");
+		printtext(520, 350, "U   - Target ON/OFF");
+		printtext(520, 300, "\\   - FPS ON/OFF");
+		printtext(520, 250, "F   - Fullscreen ON/OFF");
+		printtext(520, 200, "R   - Reiniciar");
+		printtext(520, 150, "ESC - Sair");
 		paused = !paused;
 
 	}
 
 	glColor3f(1, 0, 0);
-	printtext(50, 50, "HEALTH:"+std::to_string(life)+"%");
-	
-	if (numBalas == 0) {
+	printtext(50, 50, "HEALTH:" + std::to_string(life) + "%");
+
+	if (!playerTank->rel) {
 		printtext(50, 30, "A recarregar...");
-		clock_t startTime = clock(); //Start timer
-		double secondsPassed;
-		double secondsToDelay = 1;
-		
-		bool flag = true;
-		while (flag)
-		{
-			secondsPassed = (clock() - startTime) / CLOCKS_PER_SEC;
-			if (secondsPassed >= secondsToDelay)
-			{
-				numBalas = 5;
-				flag = false;
-			}
-		}
-		
-	}else{
+		numBalas = 5;
+
+	}
+	else {
 		printtext(50, 30, std::to_string(numBalas) + "/5 RELOAD");
 	}
-	
+
 	glEnable(GL_LIGHTING);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glutSwapBuffers();
 }
 
-void printtext(int x, int y,   string string)
+void printtext(int x, int y, string string)
 {
 	//(x,y) is from the bottom left of the window
 	glMatrixMode(GL_PROJECTION);
@@ -727,7 +686,7 @@ void imprime_ajuda(void)
 }
 
 void setOrthographicProjection() {
-	
+
 	// switch to projection mode
 	glMatrixMode(GL_PROJECTION);
 	// save previous matrix which contains the 
@@ -751,13 +710,13 @@ void resetPerspectiveProjection() {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void handlePassiveMouse(int x, int y){
+void handlePassiveMouse(int x, int y) {
 	playerTank->rotateTurret(0.1*(lastMouseX - x));
 	lagDistance += 0.1*(lastMouseX - x);
 	lastMouseX = x;
-	if (x <= 2 || x >= 1438){
+	if (x <= 2 || x >= 1438) {
 		glutWarpPointer(770, 450);
-		if (leftMouseDown){
+		if (leftMouseDown) {
 			if (playerTank->fire()) {
 				numBalas--;
 				screenShakeMagnitude += 0.1f;
@@ -779,8 +738,8 @@ void playerFire(int button, int state, int x, int y) {
 	}
 }
 
-void handleActiveMouse(int x, int y){
-	handlePassiveMouse(x,y);
+void handleActiveMouse(int x, int y) {
+	handlePassiveMouse(x, y);
 }
 
 
@@ -795,8 +754,8 @@ void Reshape(int width, int height)
 }
 
 
-void createTank(int numTanks){
-	
+void createTank(int numTanks) {
+
 	for (int i = 0; i < numTanks; i++) {
 		int x = 0;
 		int z = 0;
@@ -811,14 +770,14 @@ void createTank(int numTanks){
 			i--;
 		}
 	}
-	
+
 }
 
 void deleteTanks() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	tanks.clear();
-	
+
 
 }
 
@@ -832,6 +791,7 @@ void drawBullets() {
 
 
 void cleanBullets() {
+
 	for (unsigned int i = 0; i < bullets.size(); i++) {
 		if (bullets[i]->isDead()) {
 			delete bullets[i];

@@ -1,10 +1,4 @@
-﻿  Tank.cpp
-  main.cpp
-  MathForms.cpp
-  Bullet.cpp
-c:\users\asus\desktop\sgrai\sgrai_rep\tankgame2\bullet.cpp(31): warning C4804: '>': unsafe use of type 'bool' in operation
-  Generating Code...
-  readjpeg.c
+﻿  main.cpp
 Bullet.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
-  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.exe
-  TankGame2.vcxproj -> C:\Users\Asus\Desktop\SGRAI\SGRAI_REP\TankGame2\Debug\TankGame2.pdb (Full PDB)
+  TankGame2.vcxproj -> C:\Users\renat\Desktop\final\TankGame2\Debug\TankGame2.exe
+  TankGame2.vcxproj -> C:\Users\renat\Desktop\final\TankGame2\Debug\TankGame2.pdb (Full PDB)

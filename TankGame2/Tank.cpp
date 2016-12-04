@@ -3,6 +3,7 @@
 #include "Globals.h"
 
 
+
 #define LARGURA_BASE        3
 #define COMPRIMENTO_BASE    5
 #define ALTURA_BASE         0.7
@@ -13,6 +14,7 @@
 
 #define COMPRIMENTO_CANHAO  5
 #define RAIO_CANHAO         0.2
+#define ShootDelay			2000
 
 GLfloat vertices[][3] = { { -0.5,-0.5,-0.5 },
 { 0.5,-0.5,-0.5 },
@@ -33,6 +35,9 @@ GLfloat cores[][3] = { { 0.0,1.0,1.0 },
 
 
 Tank::Tank(float positionX, float positionZ, float initialRotation) {
+	this->NextShootTime = 0;
+	this->rel = true;
+	this->reload = 0;
 	this->speed = 0.0f;
 	this->posX = positionX;
 	this->posZ = positionZ;
@@ -112,12 +117,27 @@ void Tank::rotateTurret(float amount) {
 }
 
 bool Tank::fire() {
-	if (this->reloadCounter <= 0) {
-		float angle = this->rotation + this->turretRotation;
-		bullets.push_back(new Bullet(this->posX-1.0f*sin(angle * PI / 180),1.0f,(this->posZ-1.0f *cos(angle * PI / 180)), this->speedX, this->speedZ,angle));
-		this->reloadCounter = this->reloadTime;
-		this->curRecoilForce += this->recoilStrength;
+	if (NextShootTime < glutGet(GLUT_ELAPSED_TIME))
+	{
+
+		if (this->reloadCounter <= 0) {
+			float angle = this->rotation + this->turretRotation;
+			bullets.push_back(new Bullet(this->posX - 1.0f*sin(angle * PI / 180), 1.0f, (this->posZ - 1.0f *cos(angle * PI / 180)), this->speedX, this->speedZ, angle));
+			this->reloadCounter = this->reloadTime;
+			this->curRecoilForce += this->recoilStrength;
+			reload++;
+		}
+		if (reload<5) {
+			NextShootTime = glutGet(GLUT_ELAPSED_TIME) + ShootDelay;
+			rel = true;
+		}
+		else {
+			NextShootTime = glutGet(GLUT_ELAPSED_TIME) + ShootDelay + 2000;
+			rel = false;
+			reload = 0;
+		}
 		return true;
+
 	}
 	return false;
 }
@@ -400,8 +420,6 @@ bool Tank::canMoveTo(float newX, float newZ) {
 
 void desenhaPoligono(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloat cor[])
 {
-	/*glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textID);*/
 
 	glBegin(GL_POLYGON);
 	glColor3fv(cor);
@@ -418,8 +436,6 @@ void desenhaPoligono(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloa
 
 void desenhaPCano(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloat cor[])
 {
-	/*glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textID);*/
 
 	glBegin(GL_POLYGON);
 	glColor3fv(cor);
@@ -437,7 +453,7 @@ void desenhaPCano(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloat c
 
 void desenhaCubo()
 {
-	
+
 	desenhaPoligono(vertices[1], vertices[0], vertices[3], vertices[2], cores[0]);
 	desenhaPoligono(vertices[2], vertices[3], vertices[7], vertices[6], cores[1]);
 	desenhaPoligono(vertices[3], vertices[0], vertices[4], vertices[7], cores[2]);
@@ -460,7 +476,7 @@ void desenhaCano()
 
 void Tank::desenhaTanque()
 {
-	//Delete comment
+
 	glPushMatrix(); {
 		glTranslated(0, 0, ALTURA_BASE*0.5);
 		glScalef(LARGURA_BASE, COMPRIMENTO_BASE, ALTURA_BASE);
@@ -470,11 +486,9 @@ void Tank::desenhaTanque()
 		glTranslated(0, 0, 1);
 		glRotatef(this->turretRotation, 0.0f, 0.0f, 1.0f);
 		glScalef(LARGURA_TORRE, COMPRIMENTO_TORRE, ALTURA_TORRE);
-		//glRotatef(20, 0, 0, 1);
 		desenhaCubo();
 
 		glTranslated(0, COMPRIMENTO_TORRE - 1, 0);
-		//glRotatef(, 1, 0, 0);
 
 		glTranslated(0, -0.2, 0);
 		glScalef(0.2, 2.5, 0.3);
@@ -484,7 +498,7 @@ void Tank::desenhaTanque()
 }
 
 void Tank::buildTank(GLuint textID) {
-	
+
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textID);
 
@@ -504,5 +518,5 @@ void Tank::buildTank(GLuint textID) {
 
 }
 
-Tank::~Tank(){
+Tank::~Tank() {
 }
