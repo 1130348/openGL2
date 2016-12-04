@@ -1,1 +1,3 @@
-﻿
+﻿Bullet.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
+  TankGame2.vcxproj -> C:\Users\renat\Desktop\sga\TankGame2\Debug\TankGame2.exe
+  TankGame2.vcxproj -> C:\Users\renat\Desktop\sga\TankGame2\Debug\TankGame2.pdb (Full PDB)

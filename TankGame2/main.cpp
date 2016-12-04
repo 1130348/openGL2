@@ -6,7 +6,9 @@
 #include <time.h>
 #include <iostream>       // std::cout
 #include <thread>
-#include <AL/alut.h>
+#include <irrKlang.h>
+
+using namespace irrklang;
 
 #pragma warning(disable:4996)
 #ifdef _WIN32
@@ -40,6 +42,7 @@ GLboolean   TARGET;
 GLboolean   GRID;
 GLboolean   AJUDA;
 GLboolean   FULL;
+GLboolean   FPSSHOW;
 GLboolean paused;
 GLboolean dead;
 GLuint texName;
@@ -51,12 +54,6 @@ typedef struct {
 	char	*data;
 }JPGImage;
 
-typedef struct {
-	ALuint buffer, source;
-	ALboolean tecla_s;
-} Estado;
-
-
 
 #define MUSICA_DISPARO "disparo.wav"
 
@@ -66,11 +63,20 @@ JPGImage imagem;
 JPGImage imagem1;
 GLuint numBalas = 5;
 GLuint life = 100;
-Estado estado;
+ISoundEngine* engine = createIrrKlangDevice();
 
+int frameCount = 0;
 
-void readAudio(char* nomeMusica);
-void checkSound();
+//  Number of frames per second
+float fps2 = 0;
+
+//  currentTime - previousTime is the time elapsed
+//  between every call of the Idle function
+int currentTime = 0, previousTime = 0;
+
+int lastTick = clock();
+int fpsLimit = 30;
+
 int main(int argc, char** argv) {
 
 	DEBUG = GL_TRUE;
@@ -83,11 +89,14 @@ int main(int argc, char** argv) {
 	FULL = GL_FALSE;
 	paused = GL_FALSE;
 	dead = GL_FALSE;
+	FPSSHOW = GL_FALSE;
 
+	
 
-	alutInit(&argc, argv);
-	readAudio(MUSICA_DISPARO);
+	if (!engine)
+		return 0; // error starting up the engine
 
+				  // play some sound stream, looped
 
 
 
@@ -143,6 +152,43 @@ void inicia() {
 void FreeTexture(GLuint texture) {
 	glDeleteTextures(3, &texture);
 }
+
+void calculateFPS()
+{
+	//  Increase frame count
+	frameCount++;
+
+	//  Get the number of milliseconds since glutInit called
+	//  (or first call to glutGet(GLUT ELAPSED TIME)).
+	currentTime = glutGet(GLUT_ELAPSED_TIME);
+
+	//  Calculate time passed
+	int timeInterval = currentTime - previousTime;
+
+	if (timeInterval > 1000)
+	{
+		//  calculate the number of frames per second
+		fps2 = frameCount / (timeInterval / 1000.0f);
+
+		//  Set time
+		previousTime = currentTime;
+
+		//  Reset frame count
+		frameCount = 0;
+	}
+}
+
+void drawFPS()
+{
+	//  Load the identity matrix so that FPS string being drawn
+	//  won't get animates
+	glLoadIdentity();
+
+	//  Print the FPS to the window
+	string str = std::to_string(fps2);
+	printtext(10, 800, str);
+}
+
 
 
 void loadTexture(GLuint texture, const char* filename)
@@ -209,7 +255,8 @@ void initRendering() {
 
 void timer(int n) {
 
-	
+	calculateFPS();
+
 	checkInput();
 
 	if (!paused) {
@@ -235,10 +282,6 @@ void timer(int n) {
 		screenShakeMagnitude *= 0.95;
 		zoomMagnitude *= 0.95;	
 
-
-		//Audio
-		checkSound();
-
 		
 		glutPostRedisplay();
 		
@@ -252,18 +295,6 @@ void setPause()
 	paused = true;
 }
 
-void checkSound() {
-	ALint state;
-	alGetSourcei(estado.source, AL_SOURCE_STATE, &state);
-	if (estado.tecla_s)
-	{
-		if (state != AL_PLAYING)
-			alSourcePlay(estado.source);
-	}
-	else
-		if (state == AL_PLAYING)
-			alSourceStop(estado.source);
-}
 
 void checkFire() {
 	
@@ -303,7 +334,7 @@ void checkFire() {
 			paused = true;
 	}
 
-	for (int i = 0; i < tanks.size(); i++) {
+	for (unsigned int i = 0; i < tanks.size(); i++) {
 		if (tanks[i]->isDead()) {
 			delete tanks[i];
 			tanks.erase(tanks.begin() + i);
@@ -323,6 +354,7 @@ void checkInput() {
 	
 	if (keyDown[27]) {
 		//delete textures cleanup();
+		engine->drop();
 		exit(0);
 	}
 	if (keyDown['w']) {
@@ -421,7 +453,8 @@ void checkInput() {
 		if (playerTank->fire()) {
 			numBalas--;
 			screenShakeMagnitude += 0.1f;
-			estado.tecla_s = AL_TRUE;  //Audio Quando a tecla é largada passa a false
+			engine->play2D("disparo.wav", false);
+			//estado.tecla_s = AL_TRUE;  //Audio Quando a tecla é largada passa a false
 		}
 		
 
@@ -475,6 +508,17 @@ void checkInput() {
 				
 		}
 	}
+
+	if (keyDown['\\']) {
+
+		if (FPSSHOW) {
+			FPSSHOW = GL_FALSE;
+		}
+		else {
+			FPSSHOW = GL_TRUE;
+		}
+	}
+
 }
 void handleKeypress(unsigned char key, int x, int y) {
 	keyDown[key] = true;
@@ -539,8 +583,10 @@ void drawScene() {
 			
 			//FreeTexture(texture);
 		}
-		//glDisable(GL_TEXTURE_2D);
+		glDisable(GL_TEXTURE_2D);
 		drawBullets();
+		glEnable(GL_TEXTURE_2D);
+
 		//drawPiramids();
 
 		for (unsigned int i = 0; i < tanks.size(); i++) {
@@ -555,6 +601,8 @@ void drawScene() {
 			glColor3f(1,0 , 0);
 
 			if (TARGET) {
+				glDisable(GL_TEXTURE_2D);
+
 				float seperation = 3.0f;
 
 				for (int i = 1; i <= 10; i++) {
@@ -566,6 +614,8 @@ void drawScene() {
 					glutSolidSphere(0.05f, 4, 4);
 					glPopMatrix();
 				}
+				glEnable(GL_TEXTURE_2D);
+
 			}
 		glPopMatrix();
 		glColor3f(0, 2.0f, 0.3f);
@@ -577,6 +627,8 @@ void drawScene() {
 	
 	glDisable(GL_LIGHTING);
 	//drawHealthBars();
+	glDisable(GL_TEXTURE_2D);
+
 
 	if (dead) {
 
@@ -585,6 +637,11 @@ void drawScene() {
 		printtext(520, 100, "Press R to Play Again");
 		paused = true;
 	}
+
+	if (FPSSHOW) {
+		drawFPS();
+	}
+
 
 	if (AJUDA) {
 
@@ -783,19 +840,5 @@ void cleanBullets() {
 	}
 
 }
-
-void readAudio(char* nomeMusica) {
-
-	estado.buffer = alutCreateBufferFromFile(nomeMusica);
-	alGenSources(1, &estado.source);
-	alSourcei(estado.source, AL_BUFFER, estado.buffer);
-	estado.tecla_s = AL_FALSE;
-}
-
-	
-
-	
-
-
 
 

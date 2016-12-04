@@ -14,6 +14,24 @@
 #define COMPRIMENTO_CANHAO  5
 #define RAIO_CANHAO         0.2
 
+GLfloat vertices[][3] = { { -0.5,-0.5,-0.5 },
+{ 0.5,-0.5,-0.5 },
+{ 0.5,0.5,-0.5 },
+{ -0.5,0.5,-0.5 },
+{ -0.5,-0.5,0.5 },
+{ 0.5,-0.5,0.5 },
+{ 0.5,0.5,0.5 },
+{ -0.5,0.5,0.5 } };
+
+GLfloat cores[][3] = { { 0.0,1.0,1.0 },
+{ 1.0,0.0,0.0 },
+{ 1.0,1.0,0.0 },
+{ 0.0,1.0,0.0 },
+{ 1.0,0.0,1.0 },
+{ 0.0,0.0,1.0 },
+{ 1.0,1.0,1.0 } };
+
+
 Tank::Tank(float positionX, float positionZ, float initialRotation) {
 	this->speed = 0.0f;
 	this->posX = positionX;
@@ -367,7 +385,7 @@ bool Tank::canMoveTo(float newX, float newZ) {
 	if (newX > mapLimit - 1.0f || newX < -mapLimit + 1.0f || newZ > mapLimit - 1.0f || newZ < -mapLimit + 1.0f) {
 		return false;
 	}
-	for (int i = 0; i < tanks.size(); i++) {
+	for (unsigned int i = 0; i < tanks.size(); i++) {
 		if (this != tanks[i] && distanceBetween(newX, newZ, tanks[i]->posX, tanks[i]->posZ) < 4.5f) {
 			return false;
 		}
@@ -398,25 +416,27 @@ void desenhaPoligono(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloa
 	glEnd();
 }
 
+void desenhaPCano(GLfloat a[], GLfloat b[], GLfloat c[], GLfloat  d[], GLfloat cor[])
+{
+	/*glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textID);*/
+
+	glBegin(GL_POLYGON);
+	glColor3fv(cor);
+	glTexCoord2f(0, 0);
+	glVertex3fv(a);
+	glTexCoord2f(0.1, 0);
+	glVertex3fv(b);
+	glTexCoord2f(0.1, 0.5);
+	glVertex3fv(c);
+	glTexCoord2f(0, 0.5);
+	glVertex3fv(d);
+	glEnd();
+}
+
+
 void desenhaCubo()
 {
-	GLfloat vertices[][3] = { { -0.5,-0.5,-0.5 },
-	{ 0.5,-0.5,-0.5 },
-	{ 0.5,0.5,-0.5 },
-	{ -0.5,0.5,-0.5 },
-	{ -0.5,-0.5,0.5 },
-	{ 0.5,-0.5,0.5 },
-	{ 0.5,0.5,0.5 },
-	{ -0.5,0.5,0.5 } };
-
-	GLfloat cores[][3] = { { 0.0,1.0,1.0 },
-	{ 1.0,0.0,0.0 },
-	{ 1.0,1.0,0.0 },
-	{ 0.0,1.0,0.0 },
-	{ 1.0,0.0,1.0 },
-	{ 0.0,0.0,1.0 },
-	{ 1.0,1.0,1.0 } };
-	
 	
 	desenhaPoligono(vertices[1], vertices[0], vertices[3], vertices[2], cores[0]);
 	desenhaPoligono(vertices[2], vertices[3], vertices[7], vertices[6], cores[1]);
@@ -425,6 +445,18 @@ void desenhaCubo()
 	desenhaPoligono(vertices[4], vertices[5], vertices[6], vertices[7], cores[4]);
 	desenhaPoligono(vertices[5], vertices[4], vertices[0], vertices[1], cores[5]);
 }
+
+void desenhaCano()
+{
+
+	desenhaPCano(vertices[1], vertices[0], vertices[3], vertices[2], cores[0]);
+	desenhaPCano(vertices[2], vertices[3], vertices[7], vertices[6], cores[1]);
+	desenhaPCano(vertices[3], vertices[0], vertices[4], vertices[7], cores[2]);
+	desenhaPCano(vertices[6], vertices[5], vertices[1], vertices[2], cores[3]);
+	desenhaPCano(vertices[4], vertices[5], vertices[6], vertices[7], cores[4]);
+	desenhaPCano(vertices[5], vertices[4], vertices[0], vertices[1], cores[5]);
+}
+
 
 void Tank::desenhaTanque()
 {
@@ -444,9 +476,10 @@ void Tank::desenhaTanque()
 		glTranslated(0, COMPRIMENTO_TORRE - 1, 0);
 		//glRotatef(, 1, 0, 0);
 
-		glTranslated(0, 1, 0);
-		glScalef(RAIO_CANHAO, COMPRIMENTO_CANHAO-2, RAIO_CANHAO);
-		desenhaCubo();
+		glTranslated(0, -0.2, 0);
+		glScalef(0.2, 2.5, 0.3);
+		desenhaCano();
+
 	}glPopMatrix();
 }
 

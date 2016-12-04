@@ -33,6 +33,8 @@ void checkInput();
 void playerFire(int button, int state, int x, int y);
 void createTank(int numTanks);
 void checkBullets();
+void readAudio(char* nomeMusica);
+void checkSound();
 void drawBullets();
 void cleanBullets();
 void checkFire();
